@@ -4,19 +4,16 @@ import(
 	"fmt"
 )
 
-type BinOp int
-
 const (
-	ADD BinOp = iota
+	ADD = iota
 	SUB
 	DIV
 	MUL
 )
 
-type Op int
 
 const (
-	PRINT Op = iota
+	PRINT = iota
 	PUSH
 	POP
 	RET
@@ -26,11 +23,12 @@ const (
 	PUSH_IP // store ip+1 on stack
 	PUSH_FP
 	JMP
+	HALT
 )
 
 type op struct {
-	code Op
-	op1 int
+	code int
+	op1  int
 }
 
 var stack []int
@@ -61,22 +59,22 @@ func run(ops []op, pc int){
 		op := ops[pc]
 
 		switch op.code {
-		case PRINT:
-			var r int
-			r = pop()
-			fmt.Println(r)
-			pc++
-		case PUSH_FP:
-			push(fp)
-			pc++
-		case PUSH_IP:
-			push(pc+1)
-			pc++
 		case PUSH:
 			push(op.op1)
 			pc++
 		case POP:
 			_ = pop()
+			pc++
+		case JMP:
+			p := pop()
+			pc = p
+		case PRINT:
+			var r int
+			r = pop()
+			fmt.Println(r)
+			pc++
+		case PUSH_IP:
+			push(pc+1)
 			pc++
 		case BIN_OP:
 			var r1, r2 int
@@ -90,7 +88,7 @@ func run(ops []op, pc int){
 				push(r1+r2)
 			case DIV:
 				push(r1/r2)
-			case MULT:
+			case MUL:
 				push(r1*r2)
 			}
 			pc++
@@ -98,6 +96,7 @@ func run(ops []op, pc int){
 			fpt := fp
 			fp = len(stack)
 			push(fpt)
+			pc++
 		case RET:
 			sp := stack[fp]
 			rv := stack[fp + 1]
@@ -107,6 +106,7 @@ func run(ops []op, pc int){
 				pop()
 			}
 			push(rv)
+			pc++
 		case STO:
 			var r1,pos int
 			if op.op1 >= 0 {

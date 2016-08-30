@@ -8,10 +8,12 @@ var ops []op
 var start int
 
 func gen(program *SL) ([]op, int, error) {
+	ops = make([]op, 0)
 	err := genInt(program, newEnv(nil), true)
 	if err != nil {
 		return nil, -1, err
 	}
+	ops = append(ops, op{ HALT, -1 })
 	return ops, start, nil
 }
 
@@ -20,11 +22,11 @@ func genInt(n N, e *env, isGlobal bool) error {
 	case *SL:
 		// first pass - handle declarations
 		count := 0
-		for i, s := range SL.ss {
+		for i, s := range t.ss {
 			switch t := s.(type) {
 			case *VDefS:
 				// local
-				e[t.name] = symbol{ count, "local" }
+				e.data[t.name] = symbol{ count, "local" }
 				count++
 
 				// we'll handle as an assignment
@@ -51,6 +53,10 @@ func genInt(n N, e *env, isGlobal bool) error {
 			}
 		}
 
+		if isGlobal {
+			start = len(ops)
+		}
+
 		for _, s := range SL.ss {
 			genInt(s, e, false)
 		}
@@ -73,7 +79,6 @@ func genInt(n N, e *env, isGlobal bool) error {
 		case DIV:
 			ops = append(op{ BIN_OP, DIV })
 		}
-
 	case *IdE:
 		sym, ok := e.lookup(t.name)
 		if !ok {

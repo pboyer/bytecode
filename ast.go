@@ -65,7 +65,7 @@ func (s *RetS) impleS(){}
 
 
 type BinOpE struct {
-	op BinOp
+	op       int
 	rhs, lhs E
 }
 
