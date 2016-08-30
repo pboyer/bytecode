@@ -21,35 +21,37 @@ func genInt(n N, e *env, isGlobal bool) error {
 	switch t := n.(type) {
 	case *SL:
 		// first pass - handle declarations
-		count := 0
-		for i, s := range t.ss {
-			switch t := s.(type) {
+		var count int
+		if isGlobal {
+			count = 0
+		} else {
+			count = 1 // numParams
+		}
+		for _, s := range t.ss {
+			switch ti := s.(type) {
 			case *VDefS:
 				// local
-				e.data[t.name] = symbol{ count, "local" }
+				e.data[ti.name] = &symbol{ count, "local", ti }
 				count++
-
-				// we'll handle as an assignment
-				SL.ss[i] = &AssignS{t.name, t.rhs }
 			case *FDefS:
 				if !isGlobal {
-					return fmt.Errorf("Nexted function %v", t.name)
+					return fmt.Errorf("Nexted function %v", ti.name)
 				}
-				sym := symbol{len(ops), "func", t}
+				sym := &symbol{len(ops), "func", ti}
 
-				e.data[t.name] = sym
+				e.data[ti.name] = sym
 
 				locals := make(map[string]*VDefS)
-				for _, s := range t.body.ss {
+				for _, s := range ti.body.ss {
 					if def, ok := s.(*VDefS); ok {
 						if _, ok := locals[def.name]; !ok {
 							locals[def.name] = def
 						}
 					}
 				}
-				t.locals = locals
+				ti.locals = locals
 
-				genInt(t.body, e, false)
+				genInt(ti.body, e, false)
 			}
 		}
 
@@ -57,37 +59,38 @@ func genInt(n N, e *env, isGlobal bool) error {
 			start = len(ops)
 		}
 
-		for _, s := range SL.ss {
+		for i, s := range t.ss {
+			switch ti := s.(type) {
+			case *VDefS:
+				if isGlobal {
+					ops = append(ops, op{ PUSH, 0 })
+				}
+				t.ss[i] = &AssignS{ti.name, ti.rhs }
+			}
+		}
+
+		for _, s := range t.ss {
 			genInt(s, e, false)
 		}
 	case *VDefS, *FDefS:
 	case *IntE:
-		ops = append(op{ PUSH, t.val })
+		ops = append(ops, op{ PUSH, t.val })
 	case *PrintS:
 		genInt(t.e, e, false)
-		ops = append(op{ PRINT })
+		ops = append(ops, op{ PRINT, -1 })
 	case *BinOpE:
 		genInt(t.lhs, e, false)
 		genInt(t.rhs, e, false)
-		switch t.op {
-		case ADD:
-			ops = append(op{ BIN_OP, ADD })
-		case SUB:
-			ops = append(op{ BIN_OP, SUB })
-		case MUL:
-			ops = append(op{ BIN_OP, MUL })
-		case DIV:
-			ops = append(op{ BIN_OP, DIV })
-		}
+		ops = append(ops, op{ BIN_OP, t.op })
 	case *IdE:
 		sym, ok := e.lookup(t.name)
 		if !ok {
 			return fmt.Errorf("Could not find %v in env", t.name)
 		}
 
-		switch sym {
+		switch sym.symbolType {
 		case "local":
-			ops = append(op{ LOAD, sym.pos })
+			ops = append(ops, op{ LOAD, sym.pos })
 		default:
 			return fmt.Errorf("Non-locals not allowed %v", t.name)
 		}
@@ -102,7 +105,7 @@ func genInt(n N, e *env, isGlobal bool) error {
 		}
 
 		// store the value of the expression in the appropriate position
-		ops = append(op{ STO, sym.pos })
+		ops = append(ops, op{ STO, sym.pos })
 	case *CallE:
 		// ...
 		// --------------- fp
@@ -126,31 +129,32 @@ func genInt(n N, e *env, isGlobal bool) error {
 		}
 
 		// store the current frame pointer on the stack, implicitly sets frame pointer register to stack pointer
-		ops = append(op{ code : PUSH_FP })
+		ops = append(ops, op{ code : PUSH_FP })
 
 		// store space for return value
-		ops = append(op{ PUSH, 0 })
+		ops = append(ops, op{ PUSH, 0 })
 
 		// store the num args, locals for function
-		ops = append(op{ code : PUSH, op1 : len(fd.locals) + 1 })
+		ops = append(ops, op{ code : PUSH, op1 : len(fd.locals) + 1 })
 
 		// make new env
 		e = newEnv(e)
 
-		// push all of the args in reverse order TODO for now only one
+		// push all of the args
+		// TODO for now only one
 		genInt(t.arg, e, false)
-		e.data[fd.param]
+		e.data[fd.param] = &symbol{ 3, "local", t.arg }
 
 		// make space for locals on stack
-		for _ := range fd.locals {
-			ops = append(op{ PUSH, 0 })
+		for _ = range fd.locals {
+			ops = append(ops, op{ PUSH, 0 })
 		}
 
-		// store the return address in the return address
-		ops = append(op{ code : PUSH_IP })
+		// store the return address
+		ops = append(ops, op{ code : PUSH_IP })
 
 		// call function
-		ops = append(op{ JMP, sym.pos })
+		ops = append(ops, op{ JMP, sym.pos })
 	case *RetS:
 		if isGlobal {
 			return fmt.Errorf("Unexpected return statement")
@@ -161,15 +165,15 @@ func genInt(n N, e *env, isGlobal bool) error {
 			genInt(t.rhs, e, false)
 
 			// store in return value pos
-			ops = append(op{ STO, 1 })
+			ops = append(ops, op{ STO, 1 })
 		}
 
 		// restore the ip from the stack and jump to return address
-		ops = append(op{ LOAD, 2 })
-		ops = append(op{ JMP })
+		ops = append(ops, op{ LOAD, 2 })
+		ops = append(ops, op{ JMP, -1 })
 
 		// restore the fp from the stack
-		ops = append(op{ RET })
+		ops = append(ops, op{ RET, -1 })
 
 		e = e.parent
 	}
@@ -184,14 +188,14 @@ func genInt(n N, e *env, isGlobal bool) error {
 //bop := op{ code : BIF }
 //
 //// branch if false
-//ops = append(bop)
+//ops = append(ops, bop)
 //
 //// emit true branch
 //cgen(n.tb, e, data)
 //
 //// after completing tb, jmp to after fb
 //tbd := op{ code : JMP }
-//ops = append(tbd)
+//ops = append(ops, tbd)
 //
 //bop.op1 = len(ops) // set the branch address
 //

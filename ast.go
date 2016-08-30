@@ -5,10 +5,12 @@ type N interface {
 }
 
 type E interface {
+	N
 	impleE()
 }
 
 type S interface {
+	N
 	impleS()
 }
 
@@ -42,7 +44,7 @@ type FDefS struct {
 	name string
 	param string
 	body *SL
-	locals map[string]*AssignS
+	locals map[string]*VDefS
 }
 
 type RetS struct {

@@ -3,7 +3,7 @@ package main
 type symbol struct {
 	pos int
 	symbolType string
-	node *N
+	node N
 }
 
 type env struct {

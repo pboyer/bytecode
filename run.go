@@ -2,18 +2,25 @@ package main
 
 import(
 	"fmt"
+	"bytes"
 )
 
+//go:generate stringer -type=opCode
+//go:generate stringer -type=binOp
+
+type binOp int
+
 const (
-	ADD = iota
+	ADD binOp = iota
 	SUB
 	DIV
 	MUL
 )
 
+type opCode int
 
 const (
-	PRINT = iota
+	PRINT opCode = iota
 	PUSH
 	POP
 	RET
@@ -27,8 +34,12 @@ const (
 )
 
 type op struct {
-	code int
+	code opCode
 	op1  int
+}
+
+func (o op) String() string {
+	return fmt.Sprintf("%v\t%v", o.code, o.op1)
 }
 
 var stack []int
@@ -46,7 +57,26 @@ func push(val int) {
 	stack = append(stack, val)
 }
 
-func run(ops []op, pc int){
+func get(i int) int {
+	if i >= len(stack) {
+		panic(fmt.Errorf("Index out of range:%v\n", stack))
+	}
+	return stack[i]
+}
+
+func dump(ops []op) (string, error) {
+	buf := &bytes.Buffer{}
+
+	for i, op := range ops {
+		_, err := fmt.Fprintf(buf, "\t%d:\t%v\n", i, op )
+		if err != nil {
+			return "", err
+		}
+	}
+	return string(buf.Bytes()), nil
+}
+
+func run(ops []op, pc int) {
 	stack = []int{ 0, 0, 0 }
 
 	fp := 0
@@ -81,7 +111,7 @@ func run(ops []op, pc int){
 			r1 = pop()
 			r2 = pop()
 
-			switch op.op1 {
+			switch binOp(op.op1) {
 			case ADD:
 				push(r1+r2)
 			case SUB:
@@ -120,10 +150,12 @@ func run(ops []op, pc int){
 			pc++
 		case LOAD:
 			pos := op.op1
-			push(stack[fp+pos+2]) // +2 accounts for the fp, returnAddr, returnVal
+			push(stack[fp+pos+3]) // +3 accounts for the fp, returnAddr, returnVal
 			pc++
+		case HALT:
+			return
 		default:
-			panic("unknown opcode")
+			panic(fmt.Errorf("unknown opcode %v", op))
 		}
 	}
 }
