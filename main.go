@@ -19,7 +19,7 @@ func main(){
 //			},
 //		},
 //	}
-//
+
 //	prog2 := &SL {
 //		ss : []S {
 //			&FDefS{
@@ -34,22 +34,22 @@ func main(){
 //				},
 //			},
 //			&PrintS {
-//				&CallE{ "add2", &IntE{ 1 }  }
+//				&CallE{ "add2", &IntE{ 5 }  },
 //			},
 //		},
 //	}
 
-	prog3 := &SL {
-		ss : []S {
-			&VDefS {
-				name : "foo",
-				rhs : &IntE{ 2 },
-			},
-			&PrintS {
-				&IdE{ "foo" },
-			},
-		},
-	}
+//	prog3 := &SL {
+//		ss : []S {
+//			&VDefS {
+//				name : "foo",
+//				rhs : &IntE{ 2 },
+//			},
+//			&PrintS {
+//				&IdE{ "foo" },
+//			},
+//		},
+//	}
 
 //	prog4 := &SL {
 //		ss : []S {
@@ -63,12 +63,42 @@ func main(){
 //		},
 //	}
 
-	ops, start, err := gen(prog3)
+	prog5 := &SL {
+		ss : []S {
+			&FDefS{
+				name : "add2P",
+				param : "a",
+				body : &SL{
+					ss : []S {
+						&RetS{
+							&CallE{ "add2", &IdE{ "a" } },
+						},
+					},
+				},
+			},
+			&FDefS{
+				name : "add2",
+				param : "a",
+				body : &SL{
+					ss : []S {
+						&RetS{
+							&BinOpE{ ADD, &IdE{ "a" }, &IntE{ 2 } },
+						},
+					},
+				},
+			},
+			&PrintS {
+				&CallE{ "add2P", &IntE{ 5 }  },
+			},
+		},
+	}
+
+	ops, start, err := gen(prog5)
 	if err != nil {
 		fmt.Printf("Error : %v", err)
 	}
 
-	d, err := dump(ops)
+	d, err := dump(ops, -1)
 	if err != nil {
 		fmt.Printf("Error : %v", err)
 	}

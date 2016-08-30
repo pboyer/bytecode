@@ -25,7 +25,8 @@ func genInt(n N, e *env, isGlobal bool) error {
 		if isGlobal {
 			count = 0
 		} else {
-			count = 1 // numParams
+			numParams := 1
+			count = numParams
 		}
 		for _, s := range t.ss {
 			switch ti := s.(type) {
@@ -35,7 +36,7 @@ func genInt(n N, e *env, isGlobal bool) error {
 				count++
 			case *FDefS:
 				if !isGlobal {
-					return fmt.Errorf("Nexted function %v", ti.name)
+					return fmt.Errorf("Nested function not allowed %v", ti.name)
 				}
 				sym := &symbol{len(ops), "func", ti}
 
@@ -51,7 +52,14 @@ func genInt(n N, e *env, isGlobal bool) error {
 				}
 				ti.locals = locals
 
-				genInt(ti.body, e, false)
+				// make new env with parameters
+				et := newEnv(e)
+				et.data[ti.param] = &symbol{ 0, "local", nil }
+
+				err := genInt(ti.body, et, false)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -70,18 +78,30 @@ func genInt(n N, e *env, isGlobal bool) error {
 		}
 
 		for _, s := range t.ss {
-			genInt(s, e, false)
+			err := genInt(s, e, false)
+			if err != nil {
+				return err
+			}
 		}
 	case *VDefS, *FDefS:
 	case *IntE:
 		ops = append(ops, op{ PUSH, t.val })
 	case *PrintS:
-		genInt(t.e, e, false)
+		err := genInt(t.e, e, false)
+		if err != nil {
+			return err
+		}
 		ops = append(ops, op{ PRINT, -1 })
 	case *BinOpE:
-		genInt(t.lhs, e, false)
-		genInt(t.rhs, e, false)
-		ops = append(ops, op{ BIN_OP, t.op })
+		err := genInt(t.lhs, e, false)
+		if err != nil {
+			return err
+		}
+		err = genInt(t.rhs, e, false)
+		if err != nil {
+			return err
+		}
+		ops = append(ops, op{ BIN_OP, int(t.op) })
 	case *IdE:
 		sym, ok := e.lookup(t.name)
 		if !ok {
@@ -96,7 +116,10 @@ func genInt(n N, e *env, isGlobal bool) error {
 		}
 	case *AssignS:
 		// compute the expression, pushing it onto the stack
-		genInt(t.rhs, e, false)
+		err := genInt(t.rhs, e, false)
+		if err != nil {
+			return err
+		}
 
 		// what is the position of the id in the frame?
 		sym,ok := e.lookup(t.lhs) // TODO globals
@@ -129,21 +152,20 @@ func genInt(n N, e *env, isGlobal bool) error {
 		}
 
 		// store the current frame pointer on the stack, implicitly sets frame pointer register to stack pointer
-		ops = append(ops, op{ code : PUSH_FP })
+		ops = append(ops, op{ PUSH_FP, -1 })
 
 		// store space for return value
 		ops = append(ops, op{ PUSH, 0 })
 
 		// store the num args, locals for function
-		ops = append(ops, op{ code : PUSH, op1 : len(fd.locals) + 1 })
-
-		// make new env
-		e = newEnv(e)
+		ops = append(ops, op{ PUSH, len(fd.locals) + 1 })
 
 		// push all of the args
 		// TODO for now only one
-		genInt(t.arg, e, false)
-		e.data[fd.param] = &symbol{ 3, "local", t.arg }
+		err := genInt(t.arg, e, false)
+		if err != nil {
+			return err
+		}
 
 		// make space for locals on stack
 		for _ = range fd.locals {
@@ -151,7 +173,7 @@ func genInt(n N, e *env, isGlobal bool) error {
 		}
 
 		// store the return address
-		ops = append(ops, op{ code : PUSH_IP })
+		ops = append(ops, op{ PUSH_IP, -1 })
 
 		// call function
 		ops = append(ops, op{ JMP, sym.pos })
@@ -162,15 +184,14 @@ func genInt(n N, e *env, isGlobal bool) error {
 
 		// compute the return value
 		if t.rhs != nil {
-			genInt(t.rhs, e, false)
+			err := genInt(t.rhs, e, false)
+			if err != nil {
+				return err
+			}
 
 			// store in return value pos
 			ops = append(ops, op{ STO, 1 })
 		}
-
-		// restore the ip from the stack and jump to return address
-		ops = append(ops, op{ LOAD, 2 })
-		ops = append(ops, op{ JMP, -1 })
 
 		// restore the fp from the stack
 		ops = append(ops, op{ RET, -1 })

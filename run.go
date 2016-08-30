@@ -64,11 +64,18 @@ func get(i int) int {
 	return stack[i]
 }
 
-func dump(ops []op) (string, error) {
+func dump(ops []op, pos int) (string, error) {
 	buf := &bytes.Buffer{}
 
+	var err error
+
 	for i, op := range ops {
-		_, err := fmt.Fprintf(buf, "\t%d:\t%v\n", i, op )
+		if pos >= 0 && i == pos {
+			_, err = fmt.Fprintf(buf, "\t%d:\t%v <- \n", i, op )
+		} else {
+			_, err = fmt.Fprintf(buf, "\t%d:\t%v\n", i, op )
+		}
+
 		if err != nil {
 			return "", err
 		}
@@ -77,6 +84,16 @@ func dump(ops []op) (string, error) {
 }
 
 func run(ops []op, pc int) {
+
+	defer func(){
+		if e := recover(); e != nil {
+			fmt.Println("Crash dump")
+			fmt.Println(dump(ops, pc))
+			fmt.Println(stack)
+			panic(e)
+		}
+	}()
+
 	stack = []int{ 0, 0, 0 }
 
 	fp := 0
@@ -96,7 +113,13 @@ func run(ops []op, pc int) {
 			_ = pop()
 			pc++
 		case JMP:
-			p := pop()
+			var p int
+			if op.op1 >= 0 {
+				p = op.op1
+			} else {
+				p = pop()
+			}
+
 			pc = p
 		case PRINT:
 			var r int
@@ -144,7 +167,6 @@ func run(ops []op, pc int) {
 			} else {
 				pos = pop()
 			}
-
 			r1 = pop()
 			stack[pos] = r1
 			pc++

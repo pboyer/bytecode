@@ -65,9 +65,8 @@ func (s *VDefS) impleS(){}
 func (s *FDefS) impleS(){}
 func (s *RetS) impleS(){}
 
-
 type BinOpE struct {
-	op       int
+	op       binOp
 	rhs, lhs E
 }
 
