@@ -1,5 +1,34 @@
 package main
 
+func makeAST(stmts []S, fdefs []*FDefS) *SL {
+
+	// main must return
+	if len(stmts) == 0 {
+		stmts = append(stmts, &RetS{})
+	} else if _, ok := stmts[len(stmts)-1].(*RetS); !ok {
+		stmts = append(stmts, &RetS{})
+	}
+
+	// inject main
+	prog := &SL {
+		ss : []S {
+			&FDefS{
+				name : "main",
+				body: &SL{
+					ss : stmts,
+				},
+			},
+		},
+	}
+
+	// and additional fdefs
+	for _, s := range fdefs {
+		prog.ss = append(prog.ss, s)
+	}
+
+	return prog
+}
+
 type N interface {
 	impleN()
 }

@@ -3,6 +3,7 @@ package main
 import(
 	"fmt"
 	"bytes"
+	"io"
 )
 
 //go:generate stringer -type=opCode
@@ -60,13 +61,6 @@ func push(val int) {
 	stack = append(stack, val)
 }
 
-func get(i int) int {
-	if i >= len(stack) {
-		panic(fmt.Errorf("Index out of range:%v\n", stack))
-	}
-	return stack[i]
-}
-
 func dump(ops []op, pos int) (string, error) {
 	buf := &bytes.Buffer{}
 
@@ -86,7 +80,7 @@ func dump(ops []op, pos int) (string, error) {
 	return string(buf.Bytes()), nil
 }
 
-func run(ops []op, pc int) {
+func run(ops []op, pc int, writer io.Writer) {
 
 	defer func(){
 		if e := recover(); e != nil {
@@ -127,7 +121,7 @@ func run(ops []op, pc int) {
 		case PRINT:
 			var r int
 			r = pop()
-			fmt.Println("PRINT", r)
+			fmt.Fprint(writer, r)
 			pc++
 		case PUSH_IP:
 			push(pc+1)
@@ -154,6 +148,8 @@ func run(ops []op, pc int) {
 			push(fpt)
 			pc++
 		case RET:
+			// Structure of the stack frame
+
 			// 0 args
 			// 1 locals
 			// 2 varCount
@@ -189,10 +185,13 @@ func run(ops []op, pc int) {
 			pc++
 		case STO:
 			var r1,pos int
+
+			// the position on the stack is provided as operand
 			if op.op1 >= 0 {
 				pos = op.op1
 				varCount := stack[fp-1]
 				pos = fp-1-varCount+pos
+			// the position is on the top of the stack
 			} else {
 				pos = pop()
 			}
@@ -200,6 +199,7 @@ func run(ops []op, pc int) {
 			stack[pos] = r1
 			pc++
 		case LOAD:
+			// the position on the stack is provided as operand
 			pos := op.op1
 			varCount := stack[fp-1]
 			push(stack[fp-1-varCount+pos])
