@@ -64,10 +64,14 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 			switch ti := s.(type) {
 			case *FDefS:
 				if !isGlobal {
-					return fmt.Errorf("Nested function not allowed %v", ti.name)
+					return fmt.Errorf("Nested function not allowed %q", ti.name)
 				}
 				// we don't know code positions yet, we'll need to resolve later
 				sym := &symbol{-1, "func", ti}
+
+				if _, ok := e.data[ti.name]; ok {
+					return fmt.Errorf("Duplicate definition of function %q", ti.name)
+				}
 				e.data[ti.name] = sym
 			}
 		}
@@ -77,9 +81,20 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		for _, s := range t.ss {
 			switch ti := s.(type) {
 			case *VDefS:
+				if _, ok := e.data[ti.name]; ok {
+					return fmt.Errorf("Duplicate definition of variable %q", ti.name)
+				}
+
 				e.data[ti.name] = &symbol{ count, "local", ti }
 				count++
 			case *FDefS:
+				// each function needs a return statement
+				if len(ti.body.ss) == 0 {
+					return fmt.Errorf("Function %q does not end with a return statement", ti.name)
+				} else if _, ok := ti.body.ss[len(ti.body.ss)-1].(*RetS); !ok {
+					return fmt.Errorf("Function %q does not end with a return statement", ti.name)
+				}
+
 				e.data[ti.name].pos = len(ops)
 
 				locals := make(map[string]*VDefS)

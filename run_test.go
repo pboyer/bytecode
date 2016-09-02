@@ -16,6 +16,7 @@ func TestAST(t *testing.T){
 					&PrintS{
 						&BinOpE{ ADD, &IntE{ 3 }, &IntE{ 2 } },
 					},
+					&RetS{},
 				},
 				[]*FDefS{},
 			),
@@ -30,6 +31,7 @@ func TestAST(t *testing.T){
 					&PrintS{
 						&CallE{"add2", []E{ &IntE{ 5 } }  },
 					},
+					&RetS{},
 				},
 				[]*FDefS{
 					&FDefS{
@@ -57,6 +59,7 @@ func TestAST(t *testing.T){
 					&PrintS{
 						&IdE{ "foo" },
 					},
+					&RetS{},
 				},
 				[]*FDefS{},
 			),
@@ -72,6 +75,7 @@ func TestAST(t *testing.T){
 					&PrintS {
 						&IdE{ "foo" },
 					},
+					&RetS{},
 				},
 				[]*FDefS{},
 			),
@@ -83,6 +87,7 @@ func TestAST(t *testing.T){
 					&PrintS{
 						&CallE{"add2P", []E{ &IntE{ 5 } }  },
 					},
+					&RetS{},
 				},
 				[]*FDefS{
 					&FDefS{
@@ -110,6 +115,48 @@ func TestAST(t *testing.T){
 				},
 			),
 			"7",
+		},
+		{
+			makeAST(
+				[]S{
+					&RetS{
+						&CallE{"printLocals", []E{ &IntE{ 5 } }  },
+					},
+				},
+				[]*FDefS{
+					&FDefS{
+						name : "printLocals",
+						args : []string{},
+						body : &SL{
+							ss : []S{
+								&VDefS{
+									name : "foo",
+									rhs : &IntE{ 1 },
+								},
+								&VDefS{
+									name : "bar",
+									rhs : &IntE{ 2 },
+								},
+								&VDefS{
+									name : "baz",
+									rhs : &IntE{ 3 },
+								},
+								&PrintS{
+									&IdE{"foo" },
+								},
+								&PrintS{
+									&IdE{"bar" },
+								},
+								&PrintS{
+									&IdE{"baz" },
+								},
+								&RetS{},
+							},
+						},
+					},
+				},
+			),
+			"123",
 		},
 	}
 
