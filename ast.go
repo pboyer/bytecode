@@ -41,9 +41,9 @@ type VDefS struct {
 }
 
 type FDefS struct {
-	name string
-	param string
-	body *SL
+	name   string
+	args   []string
+	body   *SL
 	locals map[string]*VDefS
 }
 
@@ -72,7 +72,7 @@ type BinOpE struct {
 
 type CallE struct {
 	name string
-	arg E
+	args []E
 }
 
 type IdE struct {

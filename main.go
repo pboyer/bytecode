@@ -5,26 +5,29 @@ import (
 )
 
 func main(){
-//	ops := []op {
-//		op{ PUSH, 2 },
-//		op{ PUSH, 1 },
-//		op{ BIN_OP, ADD },
-//		op{ PRINT, 0 },
-//	}
 
-//	prog := &SL {
-//		ss : []S {
+//	prog := prog(
+//		[]S {
 //			&PrintS{
 //				&BinOpE{ ADD, &IntE{ 3 }, &IntE{ 2 } },
 //			},
 //		},
-//	}
+//		[]*FDefS{},
+//	)
 
-//	prog2 := &SL {
-//		ss : []S {
+//	prog2 := prog(
+//		[]S{
+//			&PrintS{
+//				&CallE{"add2", []E{ &IntE{ 12 } }  },
+//			},
+//			&PrintS{
+//				&CallE{"add2", []E{ &IntE{ 5 } }  },
+//			},
+//		},
+//		[]*FDefS{
 //			&FDefS{
 //				name : "add2",
-//				param : "a",
+//				args : []string{ "a" },
 //				body : &SL{
 //					ss : []S {
 //						&RetS{
@@ -33,26 +36,24 @@ func main(){
 //					},
 //				},
 //			},
-//			&PrintS {
-//				&CallE{ "add2", &IntE{ 5 }  },
-//			},
 //		},
-//	}
+//	)
 
-//	prog3 := &SL {
-//		ss : []S {
-//			&VDefS {
+//	prog3 := prog(
+//		[]S{
+//			&VDefS{
 //				name : "foo",
 //				rhs : &IntE{ 2 },
 //			},
-//			&PrintS {
+//			&PrintS{
 //				&IdE{ "foo" },
 //			},
 //		},
-//	}
+//		[]*FDefS{},
+//	)
 
-//	prog4 := &SL {
-//		ss : []S {
+//	prog4 := prog(
+//		[]S {
 //			&VDefS {
 //				name : "foo",
 //				rhs : &BinOpE{ ADD, &IntE{ 3 }, &IntE{ 2 } },
@@ -61,48 +62,80 @@ func main(){
 //				&IdE{ "foo" },
 //			},
 //		},
-//	}
+//		[]*FDefS{},
+//	)
 
-	prog5 := &SL {
-		ss : []S {
+	prog5 := prog(
+		[]S{
+			&PrintS{
+				&CallE{"add2P", []E{ &IntE{ 5 } }  },
+			},
+		},
+		[]*FDefS{
 			&FDefS{
 				name : "add2P",
-				param : "a",
+				args : []string{"a" },
 				body : &SL{
-					ss : []S {
+					ss : []S{
 						&RetS{
-							&CallE{ "add2", &IdE{ "a" } },
+							&CallE{"add2", []E{ &IdE{ "a" } } },
 						},
 					},
 				},
 			},
 			&FDefS{
 				name : "add2",
-				param : "a",
+				args : []string{"a" },
 				body : &SL{
-					ss : []S {
+					ss : []S{
 						&RetS{
-							&BinOpE{ ADD, &IdE{ "a" }, &IntE{ 2 } },
+							&BinOpE{ADD, &IdE{ "a" }, &IntE{ 2 } },
 						},
 					},
 				},
 			},
-			&PrintS {
-				&CallE{ "add2P", &IntE{ 5 }  },
-			},
 		},
-	}
+	)
 
 	ops, start, err := gen(prog5)
 	if err != nil {
 		fmt.Printf("Error : %v", err)
 	}
 
-	d, err := dump(ops, -1)
+	d, err := dump(ops, start)
 	if err != nil {
 		fmt.Printf("Error : %v", err)
 	}
 	fmt.Println( d )
 
 	run(ops, start)
+}
+
+func prog(stmts []S, fdefs []*FDefS) *SL {
+
+	// main must return
+	if len(stmts) == 0 {
+		stmts = append(stmts, &RetS{})
+	} else if _, ok := stmts[len(stmts)-1].(*RetS); !ok {
+		stmts = append(stmts, &RetS{})
+	}
+
+	// inject main
+	prog := &SL {
+		ss : []S {
+			&FDefS{
+				name : "main",
+				body: &SL{
+					ss : stmts,
+				},
+			},
+		},
+	}
+
+	// and additional fdefs
+	for _, s := range fdefs {
+		prog.ss = append(prog.ss, s)
+	}
+
+	return prog
 }

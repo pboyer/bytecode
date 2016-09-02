@@ -39,7 +39,10 @@ type op struct {
 }
 
 func (o op) String() string {
-	return fmt.Sprintf("%v\t%v", o.code, o.op1)
+	if o.op1 >= 0 {
+		return fmt.Sprintf("%v\t%v", o.code, o.op1)
+	}
+	return fmt.Sprintf("%v", o.code)
 }
 
 var stack []int
@@ -87,14 +90,14 @@ func run(ops []op, pc int) {
 
 	defer func(){
 		if e := recover(); e != nil {
-			fmt.Println("Crash dump")
+			fmt.Println("Crash dump:")
 			fmt.Println(dump(ops, pc))
 			fmt.Println(stack)
 			panic(e)
 		}
 	}()
 
-	stack = []int{ 0, 0, 0 }
+	stack = []int{}
 
 	fp := 0
 
@@ -124,7 +127,7 @@ func run(ops []op, pc int) {
 		case PRINT:
 			var r int
 			r = pop()
-			fmt.Println(r)
+			fmt.Println("PRINT", r)
 			pc++
 		case PUSH_IP:
 			push(pc+1)
@@ -151,19 +154,45 @@ func run(ops []op, pc int) {
 			push(fpt)
 			pc++
 		case RET:
-			sp := stack[fp]
-			rv := stack[fp + 1]
-			numArgsLocals := stack[fp+2]
-			pc = stack[fp + numArgsLocals + 3]
+			// 0 args
+			// 1 locals
+			// 2 varCount
+			// 3 oldfp               FP
+			// 4 return address
+			// 5 return value        SP
+
+			// pop the return value
+			rv := pop()
+
+			// we'll need this offset
+			varCount := stack[fp-1]
+
+			newFp := stack[fp]
+
+			retAd := stack[fp+1]
+
+			// pop all remnants of the func call off
+			sp := fp - 1 - varCount
 			for len(stack) > sp {
 				pop()
 			}
+
+			// restore old frame pointer
+			fp = newFp
+
+			// move to the return address
+			pc = retAd
+
+			// push the return value onto the stack
 			push(rv)
+
 			pc++
 		case STO:
 			var r1,pos int
 			if op.op1 >= 0 {
-				pos = op.op1+3
+				pos = op.op1
+				varCount := stack[fp-1]
+				pos = fp-1-varCount+pos
 			} else {
 				pos = pop()
 			}
@@ -172,7 +201,8 @@ func run(ops []op, pc int) {
 			pc++
 		case LOAD:
 			pos := op.op1
-			push(stack[fp+pos+3]) // +3 accounts for the fp, returnAddr, returnVal
+			varCount := stack[fp-1]
+			push(stack[fp-1-varCount+pos])
 			pc++
 		case HALT:
 			return
