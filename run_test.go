@@ -120,7 +120,7 @@ func TestAST(t *testing.T){
 			makeAST(
 				[]S{
 					&RetS{
-						&CallE{"printLocals", []E{ &IntE{ 5 } }  },
+						&CallE{"printLocals", []E{}  },
 					},
 				},
 				[]*FDefS{
@@ -131,15 +131,15 @@ func TestAST(t *testing.T){
 							ss : []S{
 								&VDefS{
 									name : "foo",
-									rhs : &IntE{ 1 },
+									rhs : &IntE{ 99 },
 								},
 								&VDefS{
 									name : "bar",
-									rhs : &IntE{ 2 },
+									rhs : &IntE{ 55 },
 								},
 								&VDefS{
 									name : "baz",
-									rhs : &IntE{ 3 },
+									rhs : &IntE{ 66 },
 								},
 								&PrintS{
 									&IdE{"foo" },
@@ -156,7 +156,7 @@ func TestAST(t *testing.T){
 					},
 				},
 			),
-			"123",
+			"995566",
 		},
 	}
 

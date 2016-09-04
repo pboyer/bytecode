@@ -77,6 +77,8 @@ func dump(ops []op, pos int) (string, error) {
 			return "", err
 		}
 	}
+
+	fmt.Fprintf(buf, "%v", stack)
 	return string(buf.Bytes()), nil
 }
 

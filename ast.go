@@ -67,6 +67,7 @@ type FDefS struct {
 	args   []string
 	body   *SL
 	locals map[string]*VDefS
+	localsComputed bool
 }
 
 type RetS struct {

@@ -73,6 +73,17 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 					return fmt.Errorf("Duplicate definition of function %q", ti.name)
 				}
 				e.data[ti.name] = sym
+
+				locals := make(map[string]*VDefS)
+				for _, s := range ti.body.ss {
+					if def, ok := s.(*VDefS); ok {
+						if _, ok := locals[def.name]; !ok {
+							locals[def.name] = def
+						}
+					}
+				}
+
+				ti.locals = locals
 			}
 		}
 
@@ -96,16 +107,6 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 				}
 
 				e.data[ti.name].pos = len(ops)
-
-				locals := make(map[string]*VDefS)
-				for _, s := range ti.body.ss {
-					if def, ok := s.(*VDefS); ok {
-						if _, ok := locals[def.name]; !ok {
-							locals[def.name] = def
-						}
-					}
-				}
-				ti.locals = locals
 
 				// make new env with parameters
 				et := newEnv(e)

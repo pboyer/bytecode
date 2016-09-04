@@ -11,6 +11,7 @@ func main(){
 			&PrintS{
 				&CallE{"add2P", []E{ &IntE{ 5 } }  },
 			},
+			&RetS{},
 		},
 		[]*FDefS{
 			&FDefS{
