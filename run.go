@@ -31,6 +31,7 @@ const (
 	PUSH_IP // store ip+1 on stack
 	PUSH_FP
 	JMP
+	CJMP
 	HALT
 )
 
@@ -78,7 +79,6 @@ func dump(ops []op, pos int) (string, error) {
 		}
 	}
 
-	fmt.Fprintf(buf, "%v", stack)
 	return string(buf.Bytes()), nil
 }
 
@@ -104,6 +104,9 @@ func run(ops []op, pc int, writer io.Writer) {
 
 		op := ops[pc]
 
+		// debug
+//		fmt.Println(op, "fp", fp, "pc", pc, stack)
+
 		switch op.code {
 		case PUSH:
 			push(op.op1)
@@ -120,6 +123,12 @@ func run(ops []op, pc int, writer io.Writer) {
 			}
 
 			pc = p
+		case CJMP:
+			if pop() != 0 {
+				pc++
+			} else {
+				pc = op.op1
+			}
 		case PRINT:
 			var r int
 			r = pop()

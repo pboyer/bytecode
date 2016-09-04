@@ -158,6 +158,82 @@ func TestAST(t *testing.T){
 			),
 			"995566",
 		},
+		{
+			makeAST(
+				[]S{
+					&VDefS{
+						name : "foo",
+						rhs : &IntE{ 99 },
+					},
+					&RetS{
+						&CallE{"printArgsLocals", []E{ &IdE{ "foo" }}  },
+					},
+				},
+				[]*FDefS{
+					&FDefS{
+						name : "printArgsLocals",
+						args : []string{ "a" },
+						body : &SL{
+							ss : []S{
+								&VDefS{
+									name : "foo",
+									rhs : &IntE{ 99 },
+								},
+								&PrintS{
+									&BinOpE{ADD, &IdE{ "a" }, &IdE{ "foo" } },
+								},
+								&RetS{},
+							},
+						},
+					},
+				},
+			),
+			"198",
+		},
+		{
+			makeAST(
+				[]S{
+					&IfS{
+						test : &IntE{ 0 },
+						tb : &SL{
+							ss : []S{
+								&PrintS{&IntE{99 } },
+							},
+						},
+						fb : &SL{
+							ss : []S{
+								&PrintS{&IntE{55 } },
+							},
+						},
+					},
+					&RetS{},
+				},
+				[]*FDefS{},
+			),
+			"55",
+		},
+		{
+			makeAST(
+				[]S{
+					&IfS{
+						test : &IntE{ 1 },
+						tb : &SL{
+							ss : []S{
+								&PrintS{&IntE{99 } },
+							},
+						},
+						fb : &SL{
+							ss : []S{
+								&PrintS{&IntE{55 } },
+							},
+						},
+					},
+					&RetS{},
+				},
+				[]*FDefS{},
+			),
+			"99",
+		},
 	}
 
 	for i, p := range progs {

@@ -256,32 +256,43 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		ops = append(ops, op{ RET, -1 })
 
 		e = e.parent
+	case *IfS:
+		// compute test
+		err := genInt(t.test, e, false, argCount)
+		if err != nil {
+			return err
+		}
+
+		// branch if false
+		bop := op{ code : CJMP }
+		bopi := len(ops)
+
+		ops = append(ops, bop)
+
+		// emit true branch
+		err = genInt(t.tb, e, false, argCount)
+		if err != nil {
+			return err
+		}
+
+		// after completing tb, jmp to after fb
+		tbd := op{ code : JMP }
+		tbdi := len(ops)
+
+		ops = append(ops, tbd)
+
+		ops[bopi].op1 = len(ops) // set the false branch address
+
+		// emit the false branch
+		err = genInt(t.fb, e, false, argCount)
+		if err != nil {
+			return err
+		}
+
+		ops[tbdi].op1 = len(ops) // set the post stmt branch address
 	}
 	return nil
 }
 
-//case *IfS:
-//// compute test
-//cgen(n.test, e, data)
-//
-//// create op reference
-//bop := op{ code : BIF }
-//
-//// branch if false
-//ops = append(ops, bop)
-//
-//// emit true branch
-//cgen(n.tb, e, data)
-//
-//// after completing tb, jmp to after fb
-//tbd := op{ code : JMP }
-//ops = append(ops, tbd)
-//
-//bop.op1 = len(ops) // set the branch address
-//
-//// emit the false branch
-//cgen(n.fb, e, data)
-//
-//tbd.op1 = len(ops) // set the true branch jmp
-//
+
 
