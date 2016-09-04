@@ -185,9 +185,9 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		}
 
 		// what is the position of the id in the frame?
-		sym,ok := e.lookup(t.lhs) // TODO globals
+		sym,ok := e.lookup(t.name) // TODO globals
 		if !ok {
-			return fmt.Errorf("Could not find %s in environment", t.lhs)
+			return fmt.Errorf("Could not find %s in environment", t.name)
 		}
 
 		// store the value of the expression in the appropriate position

@@ -5,26 +5,11 @@ import (
 	"os"
 )
 
+//go:generate go tool yacc -o parser.go -p parser parser.y
+
 func main(){
-	p := makeAST(
-		[]S{
-			&IfS{
-				test : &IntE{ 0 },
-				tb : &SL{
-					ss : []S{
-						&PrintS{&IntE{99 } },
-					},
-				},
-				fb : &SL{
-					ss : []S{
-						&PrintS{&IntE{55 } },
-					},
-				},
-			},
-			&RetS{},
-		},
-		[]*FDefS{},
-	)
+
+	parserParse(&lex{})
 
 	ops, start, err := gen(p)
 	if err != nil {

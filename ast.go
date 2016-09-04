@@ -47,8 +47,8 @@ type PrintS struct {
 }
 
 type AssignS struct {
-	lhs string
-	rhs E
+	name string
+	rhs  E
 }
 
 type IfS struct {

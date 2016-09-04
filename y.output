@@ -1,0 +1,281 @@
+
+state 0
+	$accept: .fdl $end 
+	fdl: .    (1)
+
+	DEF  shift 3
+	.  reduce 1 (src line 34)
+
+	fd  goto 2
+	fdl  goto 1
+
+state 1
+	$accept:  fdl.$end 
+
+	$end  accept
+	.  error
+
+
+state 2
+	fdl:  fd.fdl 
+	fdl: .    (1)
+
+	DEF  shift 3
+	.  reduce 1 (src line 34)
+
+	fd  goto 2
+	fdl  goto 4
+
+state 3
+	fd:  DEF.ID '(' idl ')' '{' sl '}' 
+
+	ID  shift 5
+	.  error
+
+
+state 4
+	fdl:  fd fdl.    (2)
+
+	.  reduce 2 (src line 37)
+
+
+state 5
+	fd:  DEF ID.'(' idl ')' '{' sl '}' 
+
+	'('  shift 6
+	.  error
+
+
+state 6
+	fd:  DEF ID '('.idl ')' '{' sl '}' 
+
+	ID  shift 8
+	.  error
+
+	idl  goto 7
+
+state 7
+	fd:  DEF ID '(' idl.')' '{' sl '}' 
+
+	')'  shift 9
+	.  error
+
+
+state 8
+	idl:  ID.    (9)
+	idl:  ID.',' idl 
+
+	','  shift 10
+	.  reduce 9 (src line 62)
+
+
+state 9
+	fd:  DEF ID '(' idl ')'.'{' sl '}' 
+
+	'{'  shift 11
+	.  error
+
+
+state 10
+	idl:  ID ','.idl 
+
+	ID  shift 8
+	.  error
+
+	idl  goto 12
+
+state 11
+	fd:  DEF ID '(' idl ')' '{'.sl '}' 
+	sl: .    (3)
+
+	ID  shift 16
+	RETURN  shift 17
+	VAR  shift 15
+	.  reduce 3 (src line 41)
+
+	s  goto 14
+	sl  goto 13
+
+state 12
+	idl:  ID ',' idl.    (10)
+
+	.  reduce 10 (src line 65)
+
+
+state 13
+	fd:  DEF ID '(' idl ')' '{' sl.'}' 
+
+	'}'  shift 18
+	.  error
+
+
+state 14
+	sl:  s.sl 
+	sl: .    (3)
+
+	ID  shift 16
+	RETURN  shift 17
+	VAR  shift 15
+	.  reduce 3 (src line 41)
+
+	s  goto 14
+	sl  goto 19
+
+state 15
+	s:  VAR.ID '=' e ';' 
+
+	ID  shift 20
+	.  error
+
+
+state 16
+	s:  ID.'=' e ';' 
+
+	'='  shift 21
+	.  error
+
+
+state 17
+	s:  RETURN.e ';' 
+
+	NUMBER  shift 23
+	.  error
+
+	e  goto 22
+
+state 18
+	fd:  DEF ID '(' idl ')' '{' sl '}'.    (8)
+
+	.  reduce 8 (src line 57)
+
+
+state 19
+	sl:  s sl.    (4)
+
+	.  reduce 4 (src line 44)
+
+
+state 20
+	s:  VAR ID.'=' e ';' 
+
+	'='  shift 24
+	.  error
+
+
+state 21
+	s:  ID '='.e ';' 
+
+	NUMBER  shift 23
+	.  error
+
+	e  goto 25
+
+state 22
+	s:  RETURN e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+
+	'+'  shift 27
+	'-'  shift 28
+	';'  shift 26
+	.  error
+
+
+state 23
+	e:  NUMBER.    (13)
+
+	.  reduce 13 (src line 74)
+
+
+state 24
+	s:  VAR ID '='.e ';' 
+
+	NUMBER  shift 23
+	.  error
+
+	e  goto 29
+
+state 25
+	s:  ID '=' e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+
+	'+'  shift 27
+	'-'  shift 28
+	';'  shift 30
+	.  error
+
+
+state 26
+	s:  RETURN e ';'.    (7)
+
+	.  reduce 7 (src line 53)
+
+
+state 27
+	e:  e '+'.e 
+
+	NUMBER  shift 23
+	.  error
+
+	e  goto 31
+
+state 28
+	e:  e '-'.e 
+
+	NUMBER  shift 23
+	.  error
+
+	e  goto 32
+
+state 29
+	s:  VAR ID '=' e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+
+	'+'  shift 27
+	'-'  shift 28
+	';'  shift 33
+	.  error
+
+
+state 30
+	s:  ID '=' e ';'.    (6)
+
+	.  reduce 6 (src line 51)
+
+
+state 31
+	e:  e.'+' e 
+	e:  e '+' e.    (11)
+	e:  e.'-' e 
+
+	.  reduce 11 (src line 69)
+
+
+state 32
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e '-' e.    (12)
+
+	.  reduce 12 (src line 72)
+
+
+state 33
+	s:  VAR ID '=' e ';'.    (5)
+
+	.  reduce 5 (src line 48)
+
+
+20 terminals, 7 nonterminals
+14 grammar rules, 34/2000 states
+0 shift/reduce, 0 reduce/reduce conflicts reported
+56 working sets used
+memory: parser 14/30000
+0 extra closures
+33 shift entries, 1 exceptions
+13 goto entries
+2 entries saved by goto default
+Optimizer space used: output 37/30000
+37 table entries, 0 zero
+maximum spread: 20, maximum offset: 28
