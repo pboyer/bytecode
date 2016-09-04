@@ -56,6 +56,22 @@ func resolve(globals *env) error {
 	return nil
 }
 
+func getLocalsRec(sl *SL, locals map[string]*VDefS){
+	for _, s := range sl.ss {
+		switch st := s.(type) {
+		case *VDefS:
+			if _, ok := locals[st.name]; !ok {
+				locals[st.name] = st
+			}
+		case *IfS:
+			getLocalsRec(st.tb, locals)
+			if st.fb != nil {
+				getLocalsRec(st.fb, locals)
+			}
+		}
+	}
+}
+
 func genInt(n N, e *env, isGlobal bool, argCount int) error {
 	switch t := n.(type) {
 	case *SL:
@@ -75,14 +91,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 				e.data[ti.name] = sym
 
 				locals := make(map[string]*VDefS)
-				for _, s := range ti.body.ss {
-					if def, ok := s.(*VDefS); ok {
-						if _, ok := locals[def.name]; !ok {
-							locals[def.name] = def
-						}
-					}
-				}
-
+				getLocalsRec(ti.body, locals)
 				ti.locals = locals
 			}
 		}
@@ -283,10 +292,12 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 
 		ops[bopi].op1 = len(ops) // set the false branch address
 
-		// emit the false branch
-		err = genInt(t.fb, e, false, argCount)
-		if err != nil {
-			return err
+		if t.fb != nil {
+			// emit the false branch
+			err = genInt(t.fb, e, false, argCount)
+			if err != nil {
+				return err
+			}
 		}
 
 		ops[tbdi].op1 = len(ops) // set the post stmt branch address

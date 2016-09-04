@@ -24,6 +24,18 @@ func TestAST(t *testing.T){
 		},
 		{
 			makeAST(
+				[]S {
+					&PrintS{
+						&BinOpE{ SUB, &IntE{ 2 }, &IntE{ 3 } },
+					},
+					&RetS{},
+				},
+				[]*FDefS{},
+			),
+			"-1",
+		},
+		{
+			makeAST(
 				[]S{
 					&PrintS{
 						&CallE{"add2", []E{ &IntE{ 12 } }  },
@@ -233,6 +245,51 @@ func TestAST(t *testing.T){
 				[]*FDefS{},
 			),
 			"99",
+		},
+		{
+			makeAST(
+				[]S{
+					&PrintS{
+						&CallE{"fibo", []E{ &IntE{ 8 } }  },
+					},
+					&RetS{},
+				},
+				[]*FDefS{
+					&FDefS{
+						name : "fibo",
+						args : []string{ "a" },
+						body : &SL{
+							ss : []S{
+								&IfS{
+									test: &BinOpE{ LEQ, &IdE{ "a" }, &IntE{ 1 } },
+									tb : &SL {
+										ss : []S{
+											&RetS{ &IntE{ 1 } },
+										},
+									},
+								},
+								&RetS{
+									&BinOpE{ADD,
+										&CallE{
+											"fibo",
+											[]E{
+												&BinOpE{SUB, &IdE{ "a" }, &IntE{ 1 } },
+											},
+										},
+										&CallE{
+											"fibo",
+											[]E{
+												&BinOpE{SUB, &IdE{ "a" }, &IntE{ 2 } },
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			),
+			"34",
 		},
 	}
 

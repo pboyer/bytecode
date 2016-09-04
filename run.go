@@ -16,6 +16,10 @@ const (
 	SUB
 	DIV
 	MUL
+	EQ
+	LEQ
+	GEQ
+	NEQ
 )
 
 type opCode int
@@ -146,11 +150,35 @@ func run(ops []op, pc int, writer io.Writer) {
 			case ADD:
 				push(r1+r2)
 			case SUB:
-				push(r1+r2)
+				push(r1-r2)
 			case DIV:
 				push(r1/r2)
 			case MUL:
 				push(r1*r2)
+			case EQ:
+				if r1 == r2 {
+					push(1)
+				} else {
+					push(0)
+				}
+			case LEQ:
+				if r1 <= r2 {
+					push(1)
+				} else {
+					push(0)
+				}
+			case GEQ:
+				if r1 >= r2 {
+					push(1)
+				} else {
+					push(0)
+				}
+			case NEQ:
+				if r1 != r2 {
+					push(1)
+				} else {
+					push(0)
+				}
 			}
 			pc++
 		case PUSH_FP:
