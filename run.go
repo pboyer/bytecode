@@ -7,25 +7,11 @@ import(
 )
 
 //go:generate stringer -type=opCode
-//go:generate stringer -type=binOp
-
-type binOp int
-
-const (
-	ADD binOp = iota
-	SUB
-	DIV
-	MUL
-	EQ
-	LEQ
-	GEQ
-	NEQ
-)
 
 type opCode int
 
 const (
-	PRIN opCode = iota
+	PRINT opCode = iota
 	PUSH
 	POP
 	RET
@@ -133,7 +119,7 @@ func run(ops []op, pc int, writer io.Writer) {
 			} else {
 				pc = op.op1
 			}
-		case PRIN:
+		case PRINT:
 			var r int
 			r = pop()
 			fmt.Fprint(writer, r)
@@ -151,18 +137,32 @@ func run(ops []op, pc int, writer io.Writer) {
 				push(r1+r2)
 			case SUB:
 				push(r1-r2)
-			case DIV:
-				push(r1/r2)
 			case MUL:
 				push(r1*r2)
+			case DIV:
+				push(r1/r2)
+			case MOD:
+				push(r1%r2)
+			case GT:
+				if r1 > r2 {
+					push(1)
+				} else {
+					push(0)
+				}
+			case LT:
+				if r1 < r2 {
+					push(1)
+				} else {
+					push(0)
+				}
 			case EQ:
 				if r1 == r2 {
 					push(1)
 				} else {
 					push(0)
 				}
-			case LEQ:
-				if r1 <= r2 {
+			case NEQ:
+				if r1 != r2 {
 					push(1)
 				} else {
 					push(0)
@@ -173,8 +173,20 @@ func run(ops []op, pc int, writer io.Writer) {
 				} else {
 					push(0)
 				}
-			case NEQ:
-				if r1 != r2 {
+			case LEQ:
+				if r1 <= r2 {
+					push(1)
+				} else {
+					push(0)
+				}
+			case AND:
+				if (r1 != 0) && (r2 != 0) {
+					push(1)
+				} else {
+					push(0)
+				}
+			case OR:
+				if (r1 != 0) || (r2 != 0) {
 					push(1)
 				} else {
 					push(0)
@@ -191,7 +203,7 @@ func run(ops []op, pc int, writer io.Writer) {
 
 			// 0 args
 			// 1 locals
-			// 2 varCount
+			// 2 varCount = len(args) + len(locals)
 			// 3 oldfp               FP
 			// 4 return address
 			// 5 return value        SP

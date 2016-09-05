@@ -4,9 +4,9 @@ package main
 
 import "fmt"
 
-const _binOp_name = "ADDSUBDIVMULEQLEQGEQNEQ"
+const _binOp_name = "ADDSUBMULDIVMODGTLTEQNEQGEQLEQANDOR"
 
-var _binOp_index = [...]uint8{0, 3, 6, 9, 12, 14, 17, 20, 23}
+var _binOp_index = [...]uint8{0, 3, 6, 9, 12, 15, 17, 19, 21, 24, 27, 30, 33, 35}
 
 func (i binOp) String() string {
 	if i < 0 || i >= binOp(len(_binOp_index)-1) {

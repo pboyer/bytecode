@@ -1,5 +1,7 @@
 package main
 
+//go:generate stringer -type=binOp
+
 func makeAST(stmts []S, fdefs []*FDefS) *SL {
 
 	// inject main
@@ -92,6 +94,24 @@ type BinOpE struct {
 	rhs, lhs E
 }
 
+type binOp int
+
+const (
+	ADD binOp = iota
+	SUB
+	MUL
+	DIV
+	MOD
+	GT
+	LT
+	EQ
+	NEQ
+	GEQ
+	LEQ
+	AND
+	OR
+)
+
 type CallE struct {
 	name string
 	args []E
@@ -114,4 +134,3 @@ func (s *BinOpE) impleE(){}
 func (s *CallE) impleE(){}
 func (s *IdE) impleE(){}
 func (s *IntE) impleE(){}
-

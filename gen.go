@@ -154,7 +154,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		if err != nil {
 			return err
 		}
-		ops = append(ops, op{PRIN, -1 })
+		ops = append(ops, op{PRINT, -1 })
 	case *BinOpE:
 		err := genInt(t.lhs, e, false, argCount)
 		if err != nil {

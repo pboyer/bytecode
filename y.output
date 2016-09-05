@@ -4,7 +4,7 @@ state 0
 	fdl: .    (2)
 
 	DEF  shift 4
-	.  reduce 2 (src line 39)
+	.  reduce 2 (src line 46)
 
 	fd  goto 3
 	prog  goto 1
@@ -20,7 +20,7 @@ state 1
 state 2
 	prog:  fdl.    (1)
 
-	.  reduce 1 (src line 34)
+	.  reduce 1 (src line 41)
 
 
 state 3
@@ -28,7 +28,7 @@ state 3
 	fdl: .    (2)
 
 	DEF  shift 4
-	.  reduce 2 (src line 39)
+	.  reduce 2 (src line 46)
 
 	fd  goto 3
 	fdl  goto 5
@@ -43,7 +43,7 @@ state 4
 state 5
 	fdl:  fd fdl.    (3)
 
-	.  reduce 3 (src line 42)
+	.  reduce 3 (src line 49)
 
 
 state 6
@@ -55,10 +55,10 @@ state 6
 
 state 7
 	fd:  DEF ID '('.idl ')' '{' sl '}' 
-	idl: .    (11)
+	idl: .    (12)
 
 	ID  shift 9
-	.  reduce 11 (src line 69)
+	.  reduce 12 (src line 78)
 
 	idl  goto 8
 
@@ -70,11 +70,11 @@ state 8
 
 
 state 9
-	idl:  ID.    (12)
+	idl:  ID.    (13)
 	idl:  ID.',' idl 
 
 	','  shift 11
-	.  reduce 12 (src line 72)
+	.  reduce 13 (src line 81)
 
 
 state 10
@@ -86,10 +86,10 @@ state 10
 
 state 11
 	idl:  ID ','.idl 
-	idl: .    (11)
+	idl: .    (12)
 
 	ID  shift 9
-	.  reduce 11 (src line 69)
+	.  reduce 12 (src line 78)
 
 	idl  goto 13
 
@@ -100,16 +100,16 @@ state 12
 	ID  shift 17
 	RETURN  shift 18
 	VAR  shift 16
-	PRINT  shift 19
-	.  reduce 4 (src line 46)
+	TPRINT  shift 19
+	.  reduce 4 (src line 53)
 
 	s  goto 15
 	sl  goto 14
 
 state 13
-	idl:  ID ',' idl.    (13)
+	idl:  ID ',' idl.    (14)
 
-	.  reduce 13 (src line 74)
+	.  reduce 14 (src line 83)
 
 
 state 14
@@ -126,8 +126,8 @@ state 15
 	ID  shift 17
 	RETURN  shift 18
 	VAR  shift 16
-	PRINT  shift 19
-	.  reduce 4 (src line 46)
+	TPRINT  shift 19
+	.  reduce 4 (src line 53)
 
 	s  goto 15
 	sl  goto 21
@@ -147,171 +147,884 @@ state 17
 
 
 state 18
+	s:  RETURN.';' 
 	s:  RETURN.e ';' 
 
-	NUMBER  shift 25
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	';'  shift 24
+	'('  shift 26
 	.  error
 
-	e  goto 24
+	e  goto 25
 
 state 19
-	s:  PRINT.e ';' 
+	s:  TPRINT.e ';' 
 
-	NUMBER  shift 25
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
 	.  error
 
-	e  goto 26
+	e  goto 30
 
 state 20
-	fd:  DEF ID '(' idl ')' '{' sl '}'.    (10)
+	fd:  DEF ID '(' idl ')' '{' sl '}'.    (11)
 
-	.  reduce 10 (src line 64)
+	.  reduce 11 (src line 73)
 
 
 state 21
 	sl:  s sl.    (5)
 
-	.  reduce 5 (src line 49)
+	.  reduce 5 (src line 56)
 
 
 state 22
 	s:  VAR ID.'=' e ';' 
 
-	'='  shift 27
+	'='  shift 31
 	.  error
 
 
 state 23
 	s:  ID '='.e ';' 
 
-	NUMBER  shift 25
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
 	.  error
 
-	e  goto 28
+	e  goto 32
 
 state 24
-	s:  RETURN e.';' 
-	e:  e.'+' e 
-	e:  e.'-' e 
+	s:  RETURN ';'.    (8)
 
-	'+'  shift 30
-	'-'  shift 31
-	';'  shift 29
-	.  error
+	.  reduce 8 (src line 65)
 
 
 state 25
-	e:  NUMBER.    (16)
+	s:  RETURN e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
 
-	.  reduce 16 (src line 83)
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	';'  shift 33
+	.  error
 
 
 state 26
-	s:  PRINT e.';' 
-	e:  e.'+' e 
-	e:  e.'-' e 
+	e:  '('.e ')' 
 
-	'+'  shift 30
-	'-'  shift 31
-	';'  shift 32
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
 	.  error
 
+	e  goto 47
 
 state 27
-	s:  VAR ID '='.e ';' 
+	e:  '-'.e 
 
-	NUMBER  shift 25
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
 	.  error
 
-	e  goto 33
+	e  goto 48
 
 state 28
-	s:  ID '=' e.';' 
-	e:  e.'+' e 
-	e:  e.'-' e 
+	e:  ID.    (33)
+	e:  ID.'(' el ')' 
 
-	'+'  shift 30
-	'-'  shift 31
-	';'  shift 34
-	.  error
+	'('  shift 49
+	.  reduce 33 (src line 127)
 
 
 state 29
-	s:  RETURN e ';'.    (8)
+	e:  NUMBER.    (35)
 
-	.  reduce 8 (src line 58)
+	.  reduce 35 (src line 131)
 
 
 state 30
-	e:  e '+'.e 
+	s:  TPRINT e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
 
-	NUMBER  shift 25
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	';'  shift 50
 	.  error
 
-	e  goto 35
 
 state 31
-	e:  e '-'.e 
+	s:  VAR ID '='.e ';' 
 
-	NUMBER  shift 25
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
 	.  error
 
-	e  goto 36
+	e  goto 51
 
 state 32
-	s:  PRINT e ';'.    (9)
+	s:  ID '=' e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
 
-	.  reduce 9 (src line 60)
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	';'  shift 52
+	.  error
 
 
 state 33
-	s:  VAR ID '=' e.';' 
-	e:  e.'+' e 
-	e:  e.'-' e 
+	s:  RETURN e ';'.    (9)
 
-	'+'  shift 30
-	'-'  shift 31
-	';'  shift 37
-	.  error
+	.  reduce 9 (src line 67)
 
 
 state 34
-	s:  ID '=' e ';'.    (7)
+	e:  e '+'.e 
 
-	.  reduce 7 (src line 56)
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
 
+	e  goto 53
 
 state 35
-	e:  e.'+' e 
-	e:  e '+' e.    (14)
-	e:  e.'-' e 
+	e:  e '-'.e 
 
-	.  reduce 14 (src line 78)
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
 
+	e  goto 54
 
 state 36
-	e:  e.'+' e 
-	e:  e.'-' e 
-	e:  e '-' e.    (15)
+	e:  e '*'.e 
 
-	.  reduce 15 (src line 81)
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
 
+	e  goto 55
 
 state 37
+	e:  e '/'.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 56
+
+state 38
+	e:  e '%'.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 57
+
+state 39
+	e:  e '>'.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 58
+
+state 40
+	e:  e '<'.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 59
+
+state 41
+	e:  e TEQ.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 60
+
+state 42
+	e:  e TNEQ.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 61
+
+state 43
+	e:  e TGEQ.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 62
+
+state 44
+	e:  e TLEQ.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 63
+
+state 45
+	e:  e TAND.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 64
+
+state 46
+	e:  e TOR.e 
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  error
+
+	e  goto 65
+
+state 47
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+	e:  '(' e.')' 
+
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	')'  shift 66
+	.  error
+
+
+state 48
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+	e:  '-' e.    (32)
+
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 32 (src line 125)
+
+
+state 49
+	e:  ID '('.el ')' 
+	el: .    (15)
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  reduce 15 (src line 87)
+
+	e  goto 68
+	el  goto 67
+
+state 50
+	s:  TPRINT e ';'.    (10)
+
+	.  reduce 10 (src line 69)
+
+
+state 51
+	s:  VAR ID '=' e.';' 
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	';'  shift 69
+	.  error
+
+
+state 52
+	s:  ID '=' e ';'.    (7)
+
+	.  reduce 7 (src line 63)
+
+
+state 53
+	e:  e.'+' e 
+	e:  e '+' e.    (18)
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 18 (src line 96)
+
+
+state 54
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e '-' e.    (19)
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 19 (src line 99)
+
+
+state 55
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e '*' e.    (20)
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 20 (src line 101)
+
+
+state 56
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e '/' e.    (21)
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 21 (src line 103)
+
+
+state 57
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e '%' e.    (22)
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 22 (src line 105)
+
+
+state 58
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e '>' e.    (23)
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 23 (src line 107)
+
+
+state 59
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e '<' e.    (24)
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 24 (src line 109)
+
+
+state 60
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e TEQ e.    (25)
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 25 (src line 111)
+
+
+state 61
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e TNEQ e.    (26)
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 26 (src line 113)
+
+
+state 62
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e TGEQ e.    (27)
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 27 (src line 115)
+
+
+state 63
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e TLEQ e.    (28)
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	.  reduce 28 (src line 117)
+
+
+state 64
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e TAND e.    (29)
+	e:  e.TOR e 
+
+	.  reduce 29 (src line 119)
+
+
+state 65
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+	e:  e TOR e.    (30)
+
+	.  reduce 30 (src line 121)
+
+
+state 66
+	e:  '(' e ')'.    (31)
+
+	.  reduce 31 (src line 123)
+
+
+state 67
+	e:  ID '(' el.')' 
+
+	')'  shift 70
+	.  error
+
+
+state 68
+	el:  e.    (16)
+	el:  e.',' el 
+	e:  e.'+' e 
+	e:  e.'-' e 
+	e:  e.'*' e 
+	e:  e.'/' e 
+	e:  e.'%' e 
+	e:  e.'>' e 
+	e:  e.'<' e 
+	e:  e.TEQ e 
+	e:  e.TNEQ e 
+	e:  e.TGEQ e 
+	e:  e.TLEQ e 
+	e:  e.TAND e 
+	e:  e.TOR e 
+
+	'+'  shift 34
+	'-'  shift 35
+	'*'  shift 36
+	'/'  shift 37
+	'%'  shift 38
+	'<'  shift 40
+	TLEQ  shift 44
+	'>'  shift 39
+	TGEQ  shift 43
+	TEQ  shift 41
+	TNEQ  shift 42
+	TAND  shift 45
+	TOR  shift 46
+	','  shift 71
+	.  reduce 16 (src line 90)
+
+
+state 69
 	s:  VAR ID '=' e ';'.    (6)
 
-	.  reduce 6 (src line 53)
+	.  reduce 6 (src line 60)
 
 
-21 terminals, 8 nonterminals
-17 grammar rules, 38/2000 states
+state 70
+	e:  ID '(' el ')'.    (34)
+
+	.  reduce 34 (src line 129)
+
+
+state 71
+	el:  e ','.el 
+	el: .    (15)
+
+	NUMBER  shift 29
+	ID  shift 28
+	'-'  shift 27
+	'('  shift 26
+	.  reduce 15 (src line 87)
+
+	e  goto 68
+	el  goto 72
+
+state 72
+	el:  e ',' el.    (17)
+
+	.  reduce 17 (src line 92)
+
+
+30 terminals, 9 nonterminals
+36 grammar rules, 73/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-57 working sets used
-memory: parser 16/30000
-0 extra closures
-39 shift entries, 1 exceptions
-15 goto entries
-2 entries saved by goto default
-Optimizer space used: output 43/30000
-43 table entries, 0 zero
-maximum spread: 21, maximum offset: 31
+58 working sets used
+memory: parser 38/30000
+36 extra closures
+272 shift entries, 1 exceptions
+31 goto entries
+3 entries saved by goto default
+Optimizer space used: output 190/30000
+190 table entries, 8 zero
+maximum spread: 30, maximum offset: 71

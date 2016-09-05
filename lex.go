@@ -67,17 +67,43 @@ func (l *lex) getTokenType(s string) int {
 	case "def":
 		return DEF
 	case "print":
-		return PRINT
+		return TPRINT
 	case "return":
 		return RETURN
 	}
 	return ID
 }
 
-func (l *lex) Lex(lval *parserSymType) int {
+func (l *lex) Lex(lval *yySymType) int {
 	for l.pos < len(l.s) {
 		c := rune(l.s[l.pos])
 
+		// >=, <=, &&, ||, !=, ==
+		if l.pos < len(l.s)-1 {
+			ct := string(c) + string(rune(l.s[l.pos+1]))
+			switch ct {
+			case ">=":
+				l.pos += 2
+				return TGEQ
+			case "<=":
+				l.pos += 2
+				return TLEQ
+			case "&&":
+				l.pos += 2
+				return TAND
+			case "||":
+				l.pos += 2
+				return TOR
+			case "!=":
+				l.pos += 2
+				return TNEQ
+			case "==":
+				l.pos += 2
+				return TEQ
+			}
+		}
+
+		// numbers, ids, tokens
 		switch {
 		case unicode.IsDigit(c):
 			n,e := l.lexNum()
