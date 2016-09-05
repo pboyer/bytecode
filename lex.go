@@ -8,22 +8,56 @@ import (
 type lex struct {
 	s string
 	pos int
+	result *SL
 }
 
 func (l *lex) lexNum() (int,error) {
+	// [0-9]+
+
 	s := ""
-	for unicode.IsDigit(rune(l.s[l.pos]))  {
-		s = s + rune(l.s[l.pos])
-		l.pos++
+	for l.pos < len(l.s) {
+		c := rune(l.s[l.pos])
+		switch {
+		case unicode.IsDigit(c):
+			s += string(c)
+			l.pos++
+		default:
+			goto done
+		}
 	}
+	done:
+
 	var res int
-	fmt.Sscan(s, &res)
-	return res
+	_, err := fmt.Sscan(s, &res)
+	if err != nil {
+		return -1, err
+	}
+	return res, nil
 }
 
 func (l *lex) lexTok() (string, error) {
-	// [_a-zA-Z]+[_a-zA-Z0-9]*
-	c := l.s[l.pos]
+	// [a-zA-Z]+[a-zA-Z0-9]*
+
+	s := ""
+	c := rune(l.s[l.pos])
+
+	if unicode.IsLetter(c) {
+		s += string(c)
+		l.pos++
+	}
+
+	for l.pos < len(l.s) {
+		c = rune(l.s[l.pos])
+		switch {
+		case unicode.IsDigit(c) || unicode.IsLetter(c):
+			s += string(c)
+			l.pos++
+		default:
+			return s, nil
+		}
+	}
+
+	return s, nil
 }
 
 func (l *lex) getTokenType(s string) int {
@@ -32,6 +66,8 @@ func (l *lex) getTokenType(s string) int {
 		return VAR
 	case "def":
 		return DEF
+	case "print":
+		return PRINT
 	case "return":
 		return RETURN
 	}
@@ -39,15 +75,22 @@ func (l *lex) getTokenType(s string) int {
 }
 
 func (l *lex) Lex(lval *parserSymType) int {
-	for l.pos > len(l.s) {
+	for l.pos < len(l.s) {
 		c := rune(l.s[l.pos])
-		switch c {
+
+		switch {
 		case unicode.IsDigit(c):
-			n := l.lexNum()
+			n,e := l.lexNum()
+			if e != nil {
+				return -1
+			}
 			lval.e = &IntE{ n }
 			return NUMBER
-		case unicode.IsLetter(c), c == "_":
-			s,err := l.lexTok()
+		case unicode.IsLetter(c):
+			s,e := l.lexTok()
+			if e != nil {
+				return -1
+			}
 			lval.str = s
 			return l.getTokenType(s)
 		case unicode.IsSpace(c):

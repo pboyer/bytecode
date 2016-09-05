@@ -4,9 +4,9 @@ package main
 
 import "fmt"
 
-const _opCode_name = "PRINTPUSHPOPRETSTOLOADBIN_OPPUSH_IPPUSH_FPJMPCJMPHALT"
+const _opCode_name = "PRINPUSHPOPRETSTOLOADBIN_OPPUSH_IPPUSH_FPJMPCJMPHALT"
 
-var _opCode_index = [...]uint8{0, 5, 9, 12, 15, 18, 22, 28, 35, 42, 45, 49, 53}
+var _opCode_index = [...]uint8{0, 4, 8, 11, 14, 17, 21, 27, 34, 41, 44, 48, 52}
 
 func (i opCode) String() string {
 	if i < 0 || i >= opCode(len(_opCode_index)-1) {

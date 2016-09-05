@@ -25,7 +25,7 @@ const (
 type opCode int
 
 const (
-	PRINT opCode = iota
+	PRIN opCode = iota
 	PUSH
 	POP
 	RET
@@ -133,7 +133,7 @@ func run(ops []op, pc int, writer io.Writer) {
 			} else {
 				pc = op.op1
 			}
-		case PRINT:
+		case PRIN:
 			var r int
 			r = pop()
 			fmt.Fprint(writer, r)

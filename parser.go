@@ -20,6 +20,7 @@ const ID = 57347
 const RETURN = 57348
 const DEF = 57349
 const VAR = 57350
+const PRINT = 57351
 
 var parserToknames = [...]string{
 	"$end",
@@ -30,6 +31,7 @@ var parserToknames = [...]string{
 	"RETURN",
 	"DEF",
 	"VAR",
+	"PRINT",
 	"'+'",
 	"'-'",
 	"'*'",
@@ -49,7 +51,7 @@ const parserEofCode = 1
 const parserErrCode = 2
 const parserMaxDepth = 200
 
-//line parser.y:78
+//line parser.y:87
 
 //line yacctab:1
 var parserExca = [...]int{
@@ -58,75 +60,76 @@ var parserExca = [...]int{
 	-2, 0,
 }
 
-const parserNprod = 14
+const parserNprod = 17
 const parserPrivate = 57344
 
 var parserTokenNames []string
 var parserStates []string
 
-const parserLast = 37
+const parserLast = 43
 
 var parserAct = [...]int{
 
-	22, 10, 18, 11, 27, 28, 27, 28, 27, 28,
-	33, 9, 30, 7, 26, 13, 6, 24, 21, 3,
-	16, 17, 25, 15, 12, 29, 20, 8, 31, 32,
-	19, 5, 23, 1, 2, 14, 4,
+	24, 11, 20, 12, 30, 31, 30, 31, 30, 31,
+	37, 10, 34, 14, 32, 30, 31, 7, 27, 23,
+	26, 29, 17, 18, 28, 16, 19, 8, 33, 21,
+	4, 35, 36, 22, 9, 6, 25, 2, 1, 13,
+	3, 5, 15,
 }
 var parserPact = [...]int{
 
-	12, -1000, 12, 26, -1000, 0, 22, -6, -19, -15,
-	22, 15, -1000, -17, 15, 21, 4, 28, -1000, -1000,
-	3, 28, -1, -1000, 28, -3, -1000, 28, 28, -5,
-	-1000, -1000, -1000, -1000,
+	23, -1000, -1000, 23, 30, -1000, 0, 29, -7, -20,
+	-16, 29, 17, -1000, -18, 17, 28, 4, 32, 32,
+	-1000, -1000, 3, 32, 5, -1000, -2, 32, -4, -1000,
+	32, 32, -1000, -6, -1000, -1000, -1000, -1000,
 }
 var parserPgo = [...]int{
 
-	0, 0, 35, 34, 33, 15, 13,
+	0, 0, 42, 40, 38, 37, 13, 27,
 }
 var parserR1 = [...]int{
 
-	0, 4, 4, 5, 5, 2, 2, 2, 3, 6,
-	6, 1, 1, 1,
+	0, 4, 5, 5, 6, 6, 2, 2, 2, 2,
+	3, 7, 7, 7, 1, 1, 1,
 }
 var parserR2 = [...]int{
 
-	0, 0, 2, 0, 2, 5, 4, 3, 8, 1,
-	3, 3, 3, 1,
+	0, 1, 0, 2, 0, 2, 5, 4, 3, 3,
+	8, 0, 1, 3, 3, 3, 1,
 }
 var parserChk = [...]int{
 
-	-1000, -4, -3, 7, -4, 5, 16, -6, 5, 17,
-	20, 18, -6, -5, -2, 8, 5, 6, 19, -5,
-	5, 14, -1, 4, 14, -1, 15, 9, 10, -1,
-	15, -1, -1, 15,
+	-1000, -4, -5, -3, 7, -5, 5, 17, -7, 5,
+	18, 21, 19, -7, -6, -2, 8, 5, 6, 9,
+	20, -6, 5, 15, -1, 4, -1, 15, -1, 16,
+	10, 11, 16, -1, 16, -1, -1, 16,
 }
 var parserDef = [...]int{
 
-	1, -2, 1, 0, 2, 0, 0, 0, 9, 0,
-	0, 3, 10, 0, 3, 0, 0, 0, 8, 4,
-	0, 0, 0, 13, 0, 0, 7, 0, 0, 0,
-	6, 11, 12, 5,
+	2, -2, 1, 2, 0, 3, 0, 11, 0, 12,
+	0, 11, 4, 13, 0, 4, 0, 0, 0, 0,
+	10, 5, 0, 0, 0, 16, 0, 0, 0, 8,
+	0, 0, 9, 0, 7, 14, 15, 6,
 }
 var parserTok1 = [...]int{
 
 	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 13, 3, 3,
-	16, 17, 11, 9, 20, 10, 3, 12, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 15,
-	3, 14, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 14, 3, 3,
+	17, 18, 12, 10, 21, 11, 3, 13, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 16,
+	3, 15, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 18, 3, 19,
+	3, 3, 3, 19, 3, 20,
 }
 var parserTok2 = [...]int{
 
-	2, 3, 4, 5, 6, 7, 8,
+	2, 3, 4, 5, 6, 7, 8, 9,
 }
 var parserTok3 = [...]int{
 	0,
@@ -473,80 +476,98 @@ parserdefault:
 	switch parsernt {
 
 	case 1:
-		parserDollar = parserS[parserpt-0 : parserpt+1]
+		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line parser.y:36
+		{
+			parserlex.(*lex).result = parserVAL.sl
+		}
+	case 2:
+		parserDollar = parserS[parserpt-0 : parserpt+1]
+		//line parser.y:41
 		{
 			parserVAL.sl = &SL{}
 		}
-	case 2:
+	case 3:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line parser.y:38
+		//line parser.y:43
 		{
 			parserVAL.sl = &SL{ss: append([]S{parserDollar[1].fd}, parserDollar[2].sl.ss...)}
 		}
-	case 3:
+	case 4:
 		parserDollar = parserS[parserpt-0 : parserpt+1]
-		//line parser.y:43
+		//line parser.y:48
 		{
 			parserVAL.sl = &SL{}
 		}
-	case 4:
+	case 5:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line parser.y:45
+		//line parser.y:50
 		{
 			parserVAL.sl = &SL{ss: append([]S{parserDollar[1].s}, parserDollar[2].sl.ss...)}
 		}
-	case 5:
+	case 6:
 		parserDollar = parserS[parserpt-5 : parserpt+1]
-		//line parser.y:50
+		//line parser.y:55
 		{
 			parserVAL.s = &VDefS{name: parserDollar[2].str, rhs: parserDollar[4].e}
 		}
-	case 6:
+	case 7:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line parser.y:52
+		//line parser.y:57
 		{
 			parserVAL.s = &AssignS{name: parserDollar[1].str, rhs: parserDollar[3].e}
 		}
-	case 7:
+	case 8:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line parser.y:54
+		//line parser.y:59
 		{
 			parserVAL.s = &RetS{rhs: parserDollar[2].e}
 		}
-	case 8:
+	case 9:
+		parserDollar = parserS[parserpt-3 : parserpt+1]
+		//line parser.y:61
+		{
+			parserVAL.s = &PrintS{e: parserDollar[2].e}
+		}
+	case 10:
 		parserDollar = parserS[parserpt-8 : parserpt+1]
-		//line parser.y:59
+		//line parser.y:66
 		{
 			parserVAL.fd = &FDefS{name: parserDollar[2].str, args: parserDollar[4].idl, body: parserDollar[7].sl}
 		}
-	case 9:
+	case 11:
+		parserDollar = parserS[parserpt-0 : parserpt+1]
+		//line parser.y:71
+		{
+			parserVAL.idl = []string{}
+		}
+	case 12:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line parser.y:64
+		//line parser.y:73
 		{
 			parserVAL.idl = []string{parserDollar[1].str}
 		}
-	case 10:
+	case 13:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line parser.y:66
+		//line parser.y:75
 		{
 			parserVAL.idl = append([]string{parserDollar[1].str}, parserDollar[3].idl...)
 		}
-	case 11:
+	case 14:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line parser.y:71
+		//line parser.y:80
 		{
 			parserVAL.e = &BinOpE{ADD, parserDollar[1].e, parserDollar[3].e}
 		}
-	case 12:
+	case 15:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line parser.y:73
+		//line parser.y:82
 		{
 			parserVAL.e = &BinOpE{SUB, parserDollar[1].e, parserDollar[3].e}
 		}
-	case 13:
+	case 16:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line parser.y:75
+		//line parser.y:84
 		{
 			parserVAL.e = parserDollar[1].e
 		}

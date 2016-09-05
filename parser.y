@@ -18,18 +18,23 @@ package main
 %type <e> e
 %type <s> s
 %type <fd> fd
-%type <sl> fdl sl
+%type <sl> prog fdl sl
 %type <idl> idl
 
 // Assignment of types to terminals
 %token <e> NUMBER
-%token <str> ID RETURN DEF VAR
+%token <str> ID RETURN DEF VAR PRINT
 
 // Arithmetic precedence
 %left '+'  '-'
 %left '*'  '/'  '%'
 
 %%
+
+prog
+	: fdl
+	{ parserlex.(*lex).result = $$ }
+	;
 
 fdl
 	: /* empty */
@@ -52,6 +57,8 @@ s
 	{ $$ = &AssignS{ name : $1, rhs : $3 } }
 	| RETURN e ';'
 	{ $$ = &RetS{ rhs : $2 } }
+	| PRINT e ';'
+	{ $$ = &PrintS{ e : $2 } }
 	;
 
 fd
@@ -60,7 +67,9 @@ fd
 	;
 
 idl
-	: ID
+	: /* empty */
+	{ $$ = []string{} }
+	| ID
 	{ $$ = []string{ $1 } }
 	| ID ',' idl
 	{ $$ = append([]string{ $1 }, $3...) }
