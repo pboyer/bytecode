@@ -8,7 +8,7 @@ import (
 type lex struct {
 	s string
 	pos int
-	result *SL
+	result *BlockS
 }
 
 func (l *lex) lexNum() (int,error) {
@@ -66,6 +66,10 @@ func (l *lex) getTokenType(s string) int {
 		return VAR
 	case "def":
 		return DEF
+//	case "if":
+//		return IF
+//	case "else":
+//		return ELSE
 	case "print":
 		return TPRINT
 	case "return":

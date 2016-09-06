@@ -2,15 +2,14 @@ package main
 
 //go:generate stringer -type=binOp
 
-func makeAST(stmts []S, fdefs []*FDefS) *SL {
-
+func makeAST(stmts []S, fdefs []*FDefS) *BlockS {
 	// inject main
-	prog := &SL {
-		ss : []S {
+	prog := &BlockS{
+		list : []S {
 			&FDefS{
 				name : "main",
-				body: &SL{
-					ss : stmts,
+				body: &BlockS{
+					list : stmts,
 				},
 			},
 		},
@@ -18,7 +17,7 @@ func makeAST(stmts []S, fdefs []*FDefS) *SL {
 
 	// and additional fdefs
 	for _, s := range fdefs {
-		prog.ss = append(prog.ss, s)
+		prog.list = append(prog.list, s)
 	}
 
 	return prog
@@ -38,11 +37,9 @@ type S interface {
 	impleS()
 }
 
-type SL struct {
-	ss []S
+type BlockS struct {
+	list []S
 }
-
-func (s *SL) impleN(){}
 
 type PrintS struct {
 	e E
@@ -55,8 +52,8 @@ type AssignS struct {
 
 type IfS struct {
 	test E
-	tb *SL
-	fb *SL
+	tb S
+	fb S
 }
 
 type VDefS struct {
@@ -67,7 +64,7 @@ type VDefS struct {
 type FDefS struct {
 	name   string
 	args   []string
-	body   *SL
+	body   *BlockS
 	locals map[string]*VDefS
 }
 
@@ -75,6 +72,7 @@ type RetS struct {
 	rhs E
 }
 
+func (s *BlockS) impleN(){}
 func (s *PrintS) impleN(){}
 func (s *AssignS) impleN(){}
 func (s *IfS) impleN(){}
@@ -82,6 +80,7 @@ func (s *FDefS) impleN(){}
 func (s *VDefS) impleN(){}
 func (s *RetS) impleN(){}
 
+func (s *BlockS) impleS(){}
 func (s *PrintS) impleS(){}
 func (s *AssignS) impleS(){}
 func (s *IfS) impleS(){}

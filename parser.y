@@ -10,7 +10,7 @@ package main
 	s S
 	e E
 	fd *FDefS
-	sl *SL
+	sl *BlockS
 	idl []string
 	el []E
 }
@@ -25,7 +25,7 @@ package main
 
 // Assignment of types to terminals
 %token <e> NUMBER
-%token <str> ID RETURN DEF VAR TPRINT
+%token <str> ID RETURN DEF VAR TPRINT IF ELSE
 
 // Precedence
 %left UMINUS
@@ -45,16 +45,16 @@ prog
 
 fdl
 	: /* empty */
-	{ $$ = &SL{} }
+	{ $$ = &BlockS{} }
 	| fd fdl
-	{ $$ = &SL{ ss : append([]S{ $1 }, $2.ss...) } }
+	{ $$ = &BlockS{ list : append([]S{ $1 }, $2.list...) } }
 	;
 
 sl
 	: /* empty */
-	{ $$ = &SL{} }
+	{ $$ = &BlockS{} }
 	| s sl
-	{ $$ = &SL{ ss : append([]S{ $1 }, $2.ss...) } }
+	{ $$ = &BlockS{ list : append([]S{ $1 }, $2.list...) } }
 	;
 
 s
@@ -62,12 +62,18 @@ s
 	{ $$ = &VDefS{ name : $2, rhs : $4 } }
 	| ID '=' e ';'
 	{ $$ = &AssignS{ name : $1, rhs : $3 } }
+	| '{' sl '}'
+	{ $$ = &BlockS{ $2 } }
 	| RETURN ';'
 	{ $$ = &RetS{} }
 	| RETURN e ';'
 	{ $$ = &RetS{ rhs : $2 } }
 	| TPRINT e ';'
 	{ $$ = &PrintS{ e : $2 } }
+	| IF '(' e ')' s
+	{ $$ = &IfS{ test : $3, tb : $5 } }
+	| IF '(' e ')' s ELSE s
+	{ $$ = &IfS{ test : $3, tb : $5, fb : $7 } }
 	;
 
 fd

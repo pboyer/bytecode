@@ -41,7 +41,7 @@ def main(){
 	run(ops, start, os.Stdout)
 }
 
-func parse(prog string) (*SL, error) {
+func parse(prog string) (*BlockS, error) {
 	l := &lex{ s : prog }
 	r := yyParse(l)
 	fmt.Println(r)

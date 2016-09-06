@@ -7,7 +7,7 @@ import (
 
 func TestAST(t *testing.T){
 	progs := []struct{
-		prog *SL
+		prog *BlockS
 		result string
 	}{
 		{
@@ -49,8 +49,8 @@ func TestAST(t *testing.T){
 					&FDefS{
 						name : "add2",
 						args : []string{ "a" },
-						body : &SL{
-							ss : []S {
+						body : &BlockS{
+							list : []S {
 								&RetS{
 									&BinOpE{ ADD, &IdE{ "a" }, &IntE{ 2 } },
 								},
@@ -105,8 +105,8 @@ func TestAST(t *testing.T){
 					&FDefS{
 						name : "add2P",
 						args : []string{"a" },
-						body : &SL{
-							ss : []S{
+						body : &BlockS{
+							list : []S{
 								&RetS{
 									&CallE{"add2", []E{ &IdE{ "a" } } },
 								},
@@ -116,8 +116,8 @@ func TestAST(t *testing.T){
 					&FDefS{
 						name : "add2",
 						args : []string{"a" },
-						body : &SL{
-							ss : []S{
+						body : &BlockS{
+							list : []S{
 								&RetS{
 									&BinOpE{ADD, &IdE{ "a" }, &IntE{ 2 } },
 								},
@@ -139,8 +139,8 @@ func TestAST(t *testing.T){
 					&FDefS{
 						name : "printLocals",
 						args : []string{},
-						body : &SL{
-							ss : []S{
+						body : &BlockS{
+							list : []S{
 								&VDefS{
 									name : "foo",
 									rhs : &IntE{ 99 },
@@ -185,8 +185,8 @@ func TestAST(t *testing.T){
 					&FDefS{
 						name : "printArgsLocals",
 						args : []string{ "a" },
-						body : &SL{
-							ss : []S{
+						body : &BlockS{
+							list : []S{
 								&VDefS{
 									name : "foo",
 									rhs : &IntE{ 99 },
@@ -207,13 +207,13 @@ func TestAST(t *testing.T){
 				[]S{
 					&IfS{
 						test : &IntE{ 0 },
-						tb : &SL{
-							ss : []S{
+						tb : &BlockS{
+							list : []S{
 								&PrintS{&IntE{99 } },
 							},
 						},
-						fb : &SL{
-							ss : []S{
+						fb : &BlockS{
+							list : []S{
 								&PrintS{&IntE{55 } },
 							},
 						},
@@ -229,13 +229,13 @@ func TestAST(t *testing.T){
 				[]S{
 					&IfS{
 						test : &IntE{ 1 },
-						tb : &SL{
-							ss : []S{
+						tb : &BlockS{
+							list : []S{
 								&PrintS{&IntE{99 } },
 							},
 						},
-						fb : &SL{
-							ss : []S{
+						fb : &BlockS{
+							list : []S{
 								&PrintS{&IntE{55 } },
 							},
 						},
@@ -258,12 +258,12 @@ func TestAST(t *testing.T){
 					&FDefS{
 						name : "fibo",
 						args : []string{ "a" },
-						body : &SL{
-							ss : []S{
+						body : &BlockS{
+							list : []S{
 								&IfS{
 									test: &BinOpE{ LEQ, &IdE{ "a" }, &IntE{ 1 } },
-									tb : &SL {
-										ss : []S{
+									tb : &BlockS{
+										list : []S{
 											&RetS{ &IntE{ 1 } },
 										},
 									},

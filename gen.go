@@ -8,7 +8,7 @@ var ops []op
 var unresolvedJmps map[string][]int
 var start int
 
-func gen(program *SL) ([]op, int, error) {
+func gen(program *BlockS) ([]op, int, error) {
 	ops = make([]op, 0)
 	unresolvedJmps = make(map[string][]int)
 
@@ -56,27 +56,29 @@ func resolve(globals *env) error {
 	return nil
 }
 
-func getLocalsRec(sl *SL, locals map[string]*VDefS){
-	for _, s := range sl.ss {
-		switch st := s.(type) {
-		case *VDefS:
-			if _, ok := locals[st.name]; !ok {
-				locals[st.name] = st
-			}
-		case *IfS:
-			getLocalsRec(st.tb, locals)
-			if st.fb != nil {
-				getLocalsRec(st.fb, locals)
-			}
+func getLocalsRec(s S, locals map[string]*VDefS){
+	switch st := s.(type) {
+	case *BlockS:
+		for _, s := range st.list {
+			getLocalsRec(s, locals)
+		}
+	case *VDefS:
+		if _, ok := locals[st.name]; !ok {
+			locals[st.name] = st
+		}
+	case *IfS:
+		getLocalsRec(st.tb, locals)
+		if st.fb != nil {
+			getLocalsRec(st.fb, locals)
 		}
 	}
 }
 
 func genInt(n N, e *env, isGlobal bool, argCount int) error {
 	switch t := n.(type) {
-	case *SL:
+	case *BlockS:
 		// discover function definition
-		for _, s := range t.ss {
+		for _, s := range t.list {
 			switch ti := s.(type) {
 			case *FDefS:
 				if !isGlobal {
@@ -98,7 +100,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 
 		// compile function definitions
 		count := argCount
-		for _, s := range t.ss {
+		for _, s := range t.list {
 			switch ti := s.(type) {
 			case *VDefS:
 				if _, ok := e.data[ti.name]; ok {
@@ -109,9 +111,9 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 				count++
 			case *FDefS:
 				// each function needs a return statement
-				if len(ti.body.ss) == 0 {
+				if len(ti.body.list) == 0 {
 					return fmt.Errorf("Function %q does not end with a return statement", ti.name)
-				} else if _, ok := ti.body.ss[len(ti.body.ss)-1].(*RetS); !ok {
+				} else if _, ok := ti.body.list[len(ti.body.list)-1].(*RetS); !ok {
 					return fmt.Errorf("Function %q does not end with a return statement", ti.name)
 				}
 
@@ -130,17 +132,17 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 			}
 		}
 
-		for i, s := range t.ss {
+		for i, s := range t.list {
 			switch ti := s.(type) {
 			case *VDefS:
 				if isGlobal {
 					ops = append(ops, op{ PUSH, 0 })
 				}
-				t.ss[i] = &AssignS{ti.name, ti.rhs }
+				t.list[i] = &AssignS{ti.name, ti.rhs }
 			}
 		}
 
-		for _, s := range t.ss {
+		for _, s := range t.list {
 			err := genInt(s, e, false, argCount)
 			if err != nil {
 				return err
