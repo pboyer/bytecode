@@ -36,6 +36,9 @@ package main
 %left TNEQ
 %left TAND TOR
 
+%nonassoc THEN
+%nonassoc ELSE
+
 %%
 
 prog
@@ -63,14 +66,14 @@ s
 	| ID '=' e ';'
 	{ $$ = &AssignS{ name : $1, rhs : $3 } }
 	| '{' sl '}'
-	{ $$ = &BlockS{ $2 } }
+	{ $$ = $2 }
 	| RETURN ';'
 	{ $$ = &RetS{} }
 	| RETURN e ';'
 	{ $$ = &RetS{ rhs : $2 } }
 	| TPRINT e ';'
 	{ $$ = &PrintS{ e : $2 } }
-	| IF '(' e ')' s
+	| IF '(' e ')' s     %prec THEN
 	{ $$ = &IfS{ test : $3, tb : $5 } }
 	| IF '(' e ')' s ELSE s
 	{ $$ = &IfS{ test : $3, tb : $5, fb : $7 } }
