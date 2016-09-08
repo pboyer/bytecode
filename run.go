@@ -1,8 +1,8 @@
 package main
 
-import(
-	"fmt"
+import (
 	"bytes"
+	"fmt"
 	"io"
 )
 
@@ -39,12 +39,12 @@ func (o op) String() string {
 
 var stack []int
 
-func pop() (int) {
+func pop() int {
 	if len(stack) == 0 {
 		panic("pop called on empty stack")
 	}
 	v := stack[len(stack)-1]
-	stack = stack[0:len(stack)-1]
+	stack = stack[0 : len(stack)-1]
 	return v
 }
 
@@ -59,9 +59,9 @@ func dump(ops []op, pos int) (string, error) {
 
 	for i, op := range ops {
 		if pos >= 0 && i == pos {
-			_, err = fmt.Fprintf(buf, "\t%d:\t%v <- \n", i, op )
+			_, err = fmt.Fprintf(buf, "\t%d:\t%v <- \n", i, op)
 		} else {
-			_, err = fmt.Fprintf(buf, "\t%d:\t%v\n", i, op )
+			_, err = fmt.Fprintf(buf, "\t%d:\t%v\n", i, op)
 		}
 
 		if err != nil {
@@ -74,7 +74,7 @@ func dump(ops []op, pos int) (string, error) {
 
 func run(ops []op, pc int, writer io.Writer) {
 
-	defer func(){
+	defer func() {
 		if e := recover(); e != nil {
 			fmt.Println("Crash dump:")
 			fmt.Println(dump(ops, pc))
@@ -88,14 +88,14 @@ func run(ops []op, pc int, writer io.Writer) {
 	fp := 0
 
 	for {
-		if pc >= len(ops){
+		if pc >= len(ops) {
 			break
 		}
 
 		op := ops[pc]
 
 		// debug
-//		fmt.Println(op, "fp", fp, "pc", pc, stack)
+		//		fmt.Println(op, "fp", fp, "pc", pc, stack)
 
 		switch op.code {
 		case PUSH:
@@ -122,10 +122,10 @@ func run(ops []op, pc int, writer io.Writer) {
 		case PRINT:
 			var r int
 			r = pop()
-			fmt.Fprint(writer, r)
+			fmt.Fprintf(writer, "%v\n", r)
 			pc++
 		case PUSH_IP:
-			push(pc+1)
+			push(pc + 1)
 			pc++
 		case BIN_OP:
 			var r1, r2 int
@@ -134,15 +134,15 @@ func run(ops []op, pc int, writer io.Writer) {
 
 			switch binOp(op.op1) {
 			case ADD:
-				push(r1+r2)
+				push(r1 + r2)
 			case SUB:
-				push(r1-r2)
+				push(r1 - r2)
 			case MUL:
-				push(r1*r2)
+				push(r1 * r2)
 			case DIV:
-				push(r1/r2)
+				push(r1 / r2)
 			case MOD:
-				push(r1%r2)
+				push(r1 % r2)
 			case GT:
 				if r1 > r2 {
 					push(1)
@@ -235,14 +235,14 @@ func run(ops []op, pc int, writer io.Writer) {
 
 			pc++
 		case STO:
-			var r1,pos int
+			var r1, pos int
 
 			// the position on the stack is provided as operand
 			if op.op1 >= 0 {
 				pos = op.op1
 				varCount := stack[fp-1]
-				pos = fp-1-varCount+pos
-			// the position is on the top of the stack
+				pos = fp - 1 - varCount + pos
+				// the position is on the top of the stack
 			} else {
 				pos = pop()
 			}
@@ -262,4 +262,3 @@ func run(ops []op, pc int, writer io.Writer) {
 		}
 	}
 }
-

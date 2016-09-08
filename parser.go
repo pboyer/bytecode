@@ -4,7 +4,9 @@ package main
 import __yyfmt__ "fmt"
 
 //line parser.y:3
-//line parser.y:8
+import "fmt"
+
+//line parser.y:10
 type yySymType struct {
 	yys int
 	str string
@@ -74,7 +76,17 @@ const yyEofCode = 1
 const yyErrCode = 2
 const yyMaxDepth = 200
 
-//line parser.y:144
+//line parser.y:146
+
+func parse(prog string) (*BlockS, error) {
+	l := &lex{s: prog}
+	r := yyParse(l)
+	if r != 0 {
+		return nil, fmt.Errorf("Unknown parser error encountered")
+	}
+
+	return l.result, nil
+}
 
 //line yacctab:1
 var yyExca = [...]int{
@@ -537,229 +549,229 @@ yydefault:
 
 	case 1:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line parser.y:46
+		//line parser.y:48
 		{
 			yylex.(*lex).result = yyVAL.sl
 		}
 	case 2:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line parser.y:51
+		//line parser.y:53
 		{
 			yyVAL.sl = &BlockS{}
 		}
 	case 3:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line parser.y:53
+		//line parser.y:55
 		{
 			yyVAL.sl = &BlockS{list: append([]S{yyDollar[1].fd}, yyDollar[2].sl.list...)}
 		}
 	case 4:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line parser.y:58
+		//line parser.y:60
 		{
 			yyVAL.sl = &BlockS{}
 		}
 	case 5:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line parser.y:60
+		//line parser.y:62
 		{
 			yyVAL.sl = &BlockS{list: append([]S{yyDollar[1].s}, yyDollar[2].sl.list...)}
 		}
 	case 6:
 		yyDollar = yyS[yypt-5 : yypt+1]
-		//line parser.y:65
+		//line parser.y:67
 		{
 			yyVAL.s = &VDefS{name: yyDollar[2].str, rhs: yyDollar[4].e}
 		}
 	case 7:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line parser.y:67
+		//line parser.y:69
 		{
 			yyVAL.s = &AssignS{name: yyDollar[1].str, rhs: yyDollar[3].e}
 		}
 	case 8:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:69
+		//line parser.y:71
 		{
 			yyVAL.s = yyDollar[2].sl
 		}
 	case 9:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line parser.y:71
+		//line parser.y:73
 		{
 			yyVAL.s = &RetS{}
 		}
 	case 10:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:73
+		//line parser.y:75
 		{
 			yyVAL.s = &RetS{rhs: yyDollar[2].e}
 		}
 	case 11:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:75
+		//line parser.y:77
 		{
 			yyVAL.s = &PrintS{e: yyDollar[2].e}
 		}
 	case 12:
 		yyDollar = yyS[yypt-5 : yypt+1]
-		//line parser.y:77
+		//line parser.y:79
 		{
 			yyVAL.s = &IfS{test: yyDollar[3].e, tb: yyDollar[5].s}
 		}
 	case 13:
 		yyDollar = yyS[yypt-7 : yypt+1]
-		//line parser.y:79
+		//line parser.y:81
 		{
 			yyVAL.s = &IfS{test: yyDollar[3].e, tb: yyDollar[5].s, fb: yyDollar[7].s}
 		}
 	case 14:
 		yyDollar = yyS[yypt-8 : yypt+1]
-		//line parser.y:84
+		//line parser.y:86
 		{
 			yyVAL.fd = &FDefS{name: yyDollar[2].str, args: yyDollar[4].idl, body: yyDollar[7].sl}
 		}
 	case 15:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line parser.y:89
+		//line parser.y:91
 		{
 			yyVAL.idl = []string{}
 		}
 	case 16:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line parser.y:91
+		//line parser.y:93
 		{
 			yyVAL.idl = []string{yyDollar[1].str}
 		}
 	case 17:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:93
+		//line parser.y:95
 		{
 			yyVAL.idl = append([]string{yyDollar[1].str}, yyDollar[3].idl...)
 		}
 	case 18:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line parser.y:98
+		//line parser.y:100
 		{
 			yyVAL.el = []E{}
 		}
 	case 19:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line parser.y:100
+		//line parser.y:102
 		{
 			yyVAL.el = []E{yyDollar[1].e}
 		}
 	case 20:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:102
+		//line parser.y:104
 		{
 			yyVAL.el = append([]E{yyDollar[1].e}, yyDollar[3].el...)
 		}
 	case 21:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:107
+		//line parser.y:109
 		{
 			yyVAL.e = &BinOpE{ADD, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 22:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:109
+		//line parser.y:111
 		{
 			yyVAL.e = &BinOpE{SUB, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 23:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:111
+		//line parser.y:113
 		{
 			yyVAL.e = &BinOpE{MUL, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 24:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:113
+		//line parser.y:115
 		{
 			yyVAL.e = &BinOpE{DIV, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 25:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:115
+		//line parser.y:117
 		{
 			yyVAL.e = &BinOpE{MOD, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 26:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:117
+		//line parser.y:119
 		{
 			yyVAL.e = &BinOpE{GT, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 27:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:119
+		//line parser.y:121
 		{
 			yyVAL.e = &BinOpE{LT, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 28:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:121
+		//line parser.y:123
 		{
 			yyVAL.e = &BinOpE{EQ, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 29:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:123
+		//line parser.y:125
 		{
 			yyVAL.e = &BinOpE{NEQ, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 30:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:125
+		//line parser.y:127
 		{
 			yyVAL.e = &BinOpE{GEQ, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 31:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:127
+		//line parser.y:129
 		{
 			yyVAL.e = &BinOpE{LEQ, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 32:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:129
+		//line parser.y:131
 		{
 			yyVAL.e = &BinOpE{AND, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 33:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:131
+		//line parser.y:133
 		{
 			yyVAL.e = &BinOpE{OR, yyDollar[1].e, yyDollar[3].e}
 		}
 	case 34:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line parser.y:133
+		//line parser.y:135
 		{
 			yyVAL.e = yyDollar[2].e
 		}
 	case 35:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line parser.y:135
+		//line parser.y:137
 		{
 			yyVAL.e = &BinOpE{MUL, &IntE{-1}, yyDollar[2].e}
 		}
 	case 36:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line parser.y:137
+		//line parser.y:139
 		{
 			yyVAL.e = &IdE{yyDollar[1].str}
 		}
 	case 37:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line parser.y:139
+		//line parser.y:141
 		{
 			yyVAL.e = &CallE{name: yyDollar[1].str, args: yyDollar[3].el}
 		}
 	case 38:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line parser.y:141
+		//line parser.y:143
 		{
 			yyVAL.e = yyDollar[1].e
 		}

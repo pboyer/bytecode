@@ -2,6 +2,8 @@
 
 package main
 
+import "fmt"
+
 %}
 
 // All the different syntax types
@@ -142,3 +144,13 @@ e
 	;
 
 %%
+
+func parse(prog string) (*BlockS, error) {
+	l := &lex{s: prog}
+	r := yyParse(l)
+	if r != 0 {
+		return nil, fmt.Errorf("Unknown parser error encountered")
+	}
+
+	return l.result, nil
+}

@@ -9,23 +9,24 @@ import (
 
 func main() {
 	p, err := parse(`
-def foo(){
-	var a = 3;
-	if (a == 3) {
-		return 55;
-	} else {
-		return 99;
+def fibo(n){
+	if (n <= 1){
+		return 1;
 	}
-	return 12;
+	return fibo(n-1) + fibo(n-2);
 }
 
 def main(){
-	print foo();
+	print fibo(6);
+	print fibo(7);
+	print fibo(8);
 	return;
 }`)
 	if err != nil {
 		return
 	}
+
+	err = check(p)
 
 	ops, start, err := gen(p)
 	if err != nil {
@@ -33,24 +34,13 @@ def main(){
 		return
 	}
 
-	s, err := dump(ops, start)
-	if err != nil {
-		fmt.Printf("Error : %v\n", err)
-		return
-	}
+	// s, err := dump(ops, start)
+	// if err != nil {
+	// 	fmt.Printf("Error : %v\n", err)
+	// 	return
+	// }
 
-	fmt.Println(s)
-	fmt.Println("Program Output")
+	// fmt.Println(s)
 
 	run(ops, start, os.Stdout)
-}
-
-func parse(prog string) (*BlockS, error) {
-	l := &lex{s: prog}
-	r := yyParse(l)
-	if r != 0 {
-		return nil, fmt.Errorf("Unknown parser error encountered")
-	}
-
-	return l.result, nil
 }
