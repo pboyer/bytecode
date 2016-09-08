@@ -7,11 +7,16 @@ import (
 
 //go:generate go tool yacc -o parser.go parser.y
 
-func main(){
+func main() {
 	p, err := parse(`
 def foo(){
-	var a = 2;
-	return a >= 1;
+	var a = 3;
+	if (a == 3) {
+		return 55;
+	} else {
+		return 99;
+	}
+	return 12;
 }
 
 def main(){
@@ -19,19 +24,18 @@ def main(){
 	return;
 }`)
 	if err != nil {
-		fmt.Printf("Error : %v", err)
 		return
 	}
 
 	ops, start, err := gen(p)
 	if err != nil {
-		fmt.Printf("Error : %v", err)
+		fmt.Printf("Error : %v\n", err)
 		return
 	}
 
 	s, err := dump(ops, start)
 	if err != nil {
-		fmt.Printf("Error : %v", err)
+		fmt.Printf("Error : %v\n", err)
 		return
 	}
 
@@ -42,9 +46,8 @@ def main(){
 }
 
 func parse(prog string) (*BlockS, error) {
-	l := &lex{ s : prog }
+	l := &lex{s: prog}
 	r := yyParse(l)
-	fmt.Println(r)
 	if r != 0 {
 		return nil, fmt.Errorf("Unknown parser error encountered")
 	}

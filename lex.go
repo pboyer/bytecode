@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 )
 
 type lex struct {
-	s string
-	pos int
+	s      string
+	pos    int
 	result *BlockS
 }
 
-func (l *lex) lexNum() (int,error) {
+func (l *lex) lexNum() (int, error) {
 	// [0-9]+
-
 	s := ""
 	for l.pos < len(l.s) {
 		c := rune(l.s[l.pos])
@@ -25,7 +25,7 @@ func (l *lex) lexNum() (int,error) {
 			goto done
 		}
 	}
-	done:
+done:
 
 	var res int
 	_, err := fmt.Sscan(s, &res)
@@ -66,10 +66,10 @@ func (l *lex) getTokenType(s string) int {
 		return VAR
 	case "def":
 		return DEF
-//	case "if":
-//		return IF
-//	case "else":
-//		return ELSE
+	case "if":
+		return IF
+	case "else":
+		return ELSE
 	case "print":
 		return TPRINT
 	case "return":
@@ -110,14 +110,14 @@ func (l *lex) Lex(lval *yySymType) int {
 		// numbers, ids, tokens
 		switch {
 		case unicode.IsDigit(c):
-			n,e := l.lexNum()
+			n, e := l.lexNum()
 			if e != nil {
 				return -1
 			}
-			lval.e = &IntE{ n }
+			lval.e = &IntE{n}
 			return NUMBER
 		case unicode.IsLetter(c):
-			s,e := l.lexTok()
+			s, e := l.lexTok()
 			if e != nil {
 				return -1
 			}
@@ -134,6 +134,58 @@ func (l *lex) Lex(lval *yySymType) int {
 	return -1
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func dup(s string, n int) string {
+	r := ""
+	for i := 0; i < n; i++ {
+		r += s
+	}
+	return r
+}
+
+func (l *lex) currentLine() (int, int, int, int) {
+	lineCount := 0
+	colCount := 0
+	startOfLine := 0
+	for i := 0; i < len(l.s); i++ {
+		if string(rune(l.s[i])) == "\n" {
+			if i > l.pos {
+				return startOfLine, i, lineCount, colCount
+			}
+			startOfLine = i + 1
+			lineCount++
+			colCount = 0
+		}
+		colCount++
+	}
+	return -1, -1, -1, -1
+}
+
 func (l *lex) Error(s string) {
-	fmt.Printf("syntax error: %s\n", s)
+	start, end, line, col := l.currentLine()
+
+	fmt.Printf("%s at line %d:%d\n\n", s, line, col)
+
+	lineText := l.s[start:end]
+	lineText = strings.Replace(lineText, "\t", " ", -1)
+	fmt.Printf("\t%s\n", lineText)
+
+	r := ""
+	r += dup(" ", l.pos-start-1)
+	r += "^"
+	r += dup(" ", end-l.pos)
+	fmt.Printf("\t%s\n\n", r)
 }

@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"fmt"
 )
 
@@ -26,11 +26,11 @@ func gen(program *BlockS) ([]op, int, error) {
 	// goto main
 	start = len(ops)
 	genInt(&CallE{
-		name : "main",
-		args : []E{},
+		name: "main",
+		args: []E{},
 	}, globalEnv, false, 0)
 
-	ops = append(ops, op{ HALT, -1 })
+	ops = append(ops, op{HALT, -1})
 	return ops, start, nil
 }
 
@@ -56,22 +56,29 @@ func resolve(globals *env) error {
 	return nil
 }
 
-func getLocalsRec(s S, locals map[string]*VDefS){
+func getLocalsRec(s S, locals map[string]*VDefS) error {
 	switch st := s.(type) {
 	case *BlockS:
 		for _, s := range st.list {
-			getLocalsRec(s, locals)
+			if err := getLocalsRec(s, locals); err != nil {
+				return err
+			}
 		}
 	case *VDefS:
 		if _, ok := locals[st.name]; !ok {
 			locals[st.name] = st
+		} else {
+			return fmt.Errorf("Duplicate definition of variable %q", st.name)
 		}
 	case *IfS:
 		getLocalsRec(st.tb, locals)
 		if st.fb != nil {
-			getLocalsRec(st.fb, locals)
+			if err := getLocalsRec(st.fb, locals); err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 func genInt(n N, e *env, isGlobal bool, argCount int) error {
@@ -107,7 +114,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 					return fmt.Errorf("Duplicate definition of variable %q", ti.name)
 				}
 
-				e.data[ti.name] = &symbol{ count, "local", ti }
+				e.data[ti.name] = &symbol{count, "local", ti}
 				count++
 			case *FDefS:
 				// each function needs a return statement
@@ -122,7 +129,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 				// make new env with parameters
 				et := newEnv(e)
 				for i, arg := range ti.args {
-					et.data[arg] = &symbol{ i, "arg", nil }
+					et.data[arg] = &symbol{i, "arg", nil}
 				}
 
 				err := genInt(ti.body, et, false, len(ti.args))
@@ -136,9 +143,9 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 			switch ti := s.(type) {
 			case *VDefS:
 				if isGlobal {
-					ops = append(ops, op{ PUSH, 0 })
+					ops = append(ops, op{PUSH, 0})
 				}
-				t.list[i] = &AssignS{ti.name, ti.rhs }
+				t.list[i] = &AssignS{ti.name, ti.rhs}
 			}
 		}
 
@@ -150,13 +157,13 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		}
 	case *VDefS, *FDefS:
 	case *IntE:
-		ops = append(ops, op{ PUSH, t.val })
+		ops = append(ops, op{PUSH, t.val})
 	case *PrintS:
 		err := genInt(t.e, e, false, argCount)
 		if err != nil {
 			return err
 		}
-		ops = append(ops, op{PRINT, -1 })
+		ops = append(ops, op{PRINT, -1})
 	case *BinOpE:
 		err := genInt(t.lhs, e, false, argCount)
 		if err != nil {
@@ -166,7 +173,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		if err != nil {
 			return err
 		}
-		ops = append(ops, op{ BIN_OP, int(t.op) })
+		ops = append(ops, op{BIN_OP, int(t.op)})
 	case *IdE:
 		sym, ok := e.lookup(t.name)
 		if !ok {
@@ -174,8 +181,8 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		}
 
 		switch sym.symbolType {
-		case "local","arg":
-			ops = append(ops, op{ LOAD, sym.pos })
+		case "local", "arg":
+			ops = append(ops, op{LOAD, sym.pos})
 		default:
 			return fmt.Errorf("Non-locals not allowed %v", t.name)
 		}
@@ -187,13 +194,13 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		}
 
 		// what is the position of the id in the frame?
-		sym,ok := e.lookup(t.name) // TODO globals
+		sym, ok := e.lookup(t.name) // TODO globals
 		if !ok {
 			return fmt.Errorf("Could not find %s in environment", t.name)
 		}
 
 		// store the value of the expression in the appropriate position
-		ops = append(ops, op{ STO, sym.pos })
+		ops = append(ops, op{STO, sym.pos})
 	case *CallE:
 		// 0 args
 		// 1 locals
@@ -208,7 +215,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 			return fmt.Errorf("Could not find func %v in environment", t.name)
 		}
 
-		fd,ok := sym.node.(*FDefS)
+		fd, ok := sym.node.(*FDefS)
 		if !ok {
 			return fmt.Errorf("%v is not a function", t.name)
 		}
@@ -223,20 +230,20 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 
 		// make space for locals on stack
 		for _ = range fd.locals {
-			ops = append(ops, op{ PUSH, 0 })
+			ops = append(ops, op{PUSH, 0})
 		}
 
 		// store the num args, locals for function
-		ops = append(ops, op{ PUSH, len(fd.locals) + len(fd.args) })
+		ops = append(ops, op{PUSH, len(fd.locals) + len(fd.args)})
 
 		// store the current frame pointer on the stack, implicitly sets frame pointer register to stack pointer
-		ops = append(ops, op{ PUSH_FP, -1 })
+		ops = append(ops, op{PUSH_FP, -1})
 
 		// store the return address
-		ops = append(ops, op{ PUSH_IP, -1 })
+		ops = append(ops, op{PUSH_IP, -1})
 
 		// call function
-		ops = append(ops, op{ JMP, sym.pos })
+		ops = append(ops, op{JMP, sym.pos})
 
 		// if, we have yet to compile the function
 		// store this code position for later
@@ -244,7 +251,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 			if _, ok := unresolvedJmps[t.name]; ok {
 				unresolvedJmps[t.name] = append(unresolvedJmps[t.name], len(ops)-1)
 			} else {
-				unresolvedJmps[t.name] = []int{ len(ops)-1 }
+				unresolvedJmps[t.name] = []int{len(ops) - 1}
 			}
 		}
 	case *RetS:
@@ -260,11 +267,11 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 			}
 		} else {
 			// if no ret value, simply push 0
-			ops = append(ops, op{ PUSH, 0 })
+			ops = append(ops, op{PUSH, 0})
 		}
 
 		// restore the fp from the stack
-		ops = append(ops, op{ RET, -1 })
+		ops = append(ops, op{RET, -1})
 
 		e = e.parent
 	case *IfS:
@@ -275,7 +282,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		}
 
 		// branch if false
-		bop := op{ code : CJMP }
+		bop := op{code: CJMP}
 		bopi := len(ops)
 
 		ops = append(ops, bop)
@@ -287,7 +294,7 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 		}
 
 		// after completing tb, jmp to after fb
-		tbd := op{ code : JMP }
+		tbd := op{code: JMP}
 		tbdi := len(ops)
 
 		ops = append(ops, tbd)
@@ -306,6 +313,3 @@ func genInt(n N, e *env, isGlobal bool, argCount int) error {
 	}
 	return nil
 }
-
-
-
